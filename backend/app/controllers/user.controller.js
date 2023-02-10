@@ -9,7 +9,7 @@ const encodedToken= (userID) =>{
         iss:'Le Duong Tri',         // Tác giả(người tạo)
         sub: userID,            // Thông tin định danh (_id)
         iat: new Date().getTime(),      //Ngày tạo Token
-        exp: new Date().setDate(new Date().getDate() + 3),      // Ngày hết hạn Token (hạn 3 ngày)
+        exp: new Date().setDate(new Date().getDate() + 1),      // Ngày hết hạn Token (hạn 1 ngày)
     },config.JWT_Secret) // secretOrPublicKey mã bí mặt (NodejsApiAuthentication)
 }
 
@@ -37,13 +37,17 @@ exports.signUp = async (req, res, next) => {
     }
 };
 
-exports.signIn= async (req, res, next) =>{
+exports.signIn= async (req, res, next) => {
     const token = encodedToken(req.params.id);
     res.setHeader('Authorization',token);
-    return res.status(200).json({message:'Loging!!!'})
+    return res.send({message:'Loging!!!'})
 }
 
-exports.addFriend = async (req, res, next) =>{
+exports.secret = async (req, res, next) => {
+    return res.send({resources: true})
+}
+
+exports.addFriend = async (req, res, next) => {
 
 };
 
