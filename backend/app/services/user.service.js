@@ -1,7 +1,6 @@
 const { ObjectId } = require("mongodb");
 
-const bcrypt = require("bcrypt-nodejs");
-const saltRounds = 10;
+const bcrypt = require("bcryptjs");
 
 class UserService {
     constructor(client) {
@@ -29,17 +28,15 @@ class UserService {
     async signUp(payload) {
         const user = this.extractUserData(payload);
 
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hash = bcrypt.hashSync(user.password, salt);
+        const salt = bcrypt.genSaltSync(10);
+        const passwordHashed = bcrypt.hashSync(user.password, salt);
 
         const result = await this.User.findOneAndUpdate(
             user,
             {
                 $set: {
-                    password: hash,
-                    fulname: { firstname: payload.firstname, lastname: payload.lastname },
-                    favorite_post: [],
-                    list_friend: [],
+                    password: passwordHashed,
+                    fulname: { firstname: payload.firstname, lastname: payload.lastname }
                 }
             },
             { returnDocument: "after", upsert: true }
