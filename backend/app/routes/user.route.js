@@ -1,22 +1,19 @@
 const express = require("express");
 const users = require("../controllers/user.controller");
+const auth = require("../middlewares/auth");
 
 const router = express.Router();
 
-const passport = require('passport');
-const passportConfig = require('../middlewares/passport');
-
 router.route("/")
     .get(users.findAll)
-    .post(users.signUp)
-    .delete(users.deleteAll)
-router.route("/login/:id").post(users.signIn)
-router.route("/secret")
-    .get(passport.authenticate('jwt',{session:false}), users.secret)
+router.route("/logout")
+    .post(auth.verifyToken, users.logOut)
+router.route("/refresh")
+    .post(users.refreshToken)
 router.route("/:id")
     .get(users.findOne)
-    .put(users.update)
-    .delete(users.delete)
+    .put(auth.verifyTokenAdmin, users.update)
+    .delete(auth.verifyTokenAdmin, users.delete)
 router.route("/:id/addfriend")
     .put()
 router.route("/:id/unfriend")
