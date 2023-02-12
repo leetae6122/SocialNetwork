@@ -30,7 +30,7 @@ exports.signIn = async (req, res, next) => {
         const authService = new AuthService(MongoDB.client);
         const user = await authService.findUser(req.body);
 
-        if(!user) return  next(new ApiError(400, "Wrong username"));
+        if(!user) return next(new ApiError(400, "Wrong username"));
 
         const validPassword= await authService.validPassword(req.body.password,user.password)
         if(!validPassword) return  next(new ApiError(400, "Wrong password"));

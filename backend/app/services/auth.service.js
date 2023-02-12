@@ -1,5 +1,3 @@
-const { ObjectId } = require("mongodb");
-
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../config");
@@ -8,7 +6,6 @@ class AuthService{
     constructor(client) {
         this.User = client.db().collection("users");
     }
-    // Định nghĩa các phương thức truy xuất CSDL sử dụng mongodb API
     extractUserData(payload) {
         const user = {
             username: payload.username,
@@ -21,7 +18,6 @@ class AuthService{
             favorite_post: payload.favorite_post,
             list_friend: payload.list_friend
         };
-        // Xóa các trường không xác định       
         Object.keys(user).forEach(
             (key) => user[key] === undefined && delete user[key]
         );
@@ -29,7 +25,6 @@ class AuthService{
     }
     async signUp(payload) {
         const user = this.extractUserData(payload);
-
         const salt = bcrypt.genSaltSync(10);
         const passwordHashed = bcrypt.hashSync(user.password, salt);
 
@@ -52,9 +47,9 @@ class AuthService{
             iss: 'Le Duong Tri',
             id: payload._id,
             admin:payload.admin
-        }, config.JWT_Secret,{
-            expiresIn: time // Ngày hết hạn Token 
-        }) // secretOrPublicKey mã bí mặt (NodejsApiAuthentication)
+        }, config.JWT_Secret,{  // secretOrPublicKey mã bí mặt (NodejsApiAuthentication)
+            expiresIn: time    // Ngày hết hạn Token 
+        }) 
     }
 
     async validPassword(validpassword, password){
