@@ -34,9 +34,7 @@ class AuthService{
                 $set: {
                     admin:false,
                     password: passwordHashed,
-                    fullname: { firstname: payload.firstname, lastname: payload.lastname },
-                    list_friend:[],
-                    favorite_post:[]
+                    fullname: { firstname: payload.firstname, lastname: payload.lastname }
                 }
             },
             { returnDocument: "after", upsert: true }
