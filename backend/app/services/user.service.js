@@ -42,10 +42,12 @@ class UserService {
     }
 
     async findListFriend(idUser, idAdd){
-        return await this.User.find({
-            _id:idUser,
+        return await this.User.findOne({
+            _id:ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
             list_friend: idAdd
-        })
+        });
+        
+        
     }
 
     async update(id, payload) {
@@ -63,16 +65,30 @@ class UserService {
 
     async addFriend(idUser, idAdd) {
         const filter = {
-            _id: idUser,
-        }
+            _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
+        };
         const update = {list_friend: idAdd};
-        const result = await this.User.updateOne(
+        const result = await this.User.findOneAndUpdate(
             filter,
-            { $push: update }
+            { $push: update },
+            { returnDocument: "after" }
         );
         return result.value;
     }
-    
+
+    async unFriend(idUser, idAdd) {
+        const filter = {
+            _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
+        };
+        const update = {list_friend: idAdd};
+        const result = await this.User.findOneAndUpdate(
+            filter,
+            { $pull: update },
+            { returnDocument: "after" }
+        );
+        return result.value;
+    }
+
     async delete(id) {
         const result = await this.User.findOneAndDelete({
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null

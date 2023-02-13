@@ -41,24 +41,24 @@ exports.addFriend = async (req, res, next) => {
 
         jwt.verify(token, config.JWT_Secret, async (error, user) => {
             if (error) return next(new ApiError(400, "Token is not valid"));
+            
             const userService = new UserService(MongoDB.client);
-
-            const FoundUser = await userService.findById(req.params.id);
-            if(!FoundUser) {
+            const FindUser = await userService.findById(req.params.id);
+            if(!FindUser) {
                 return next(new ApiError(400, "User does not exist"));
             }
 
-            const FoundlistFriend = await userService.findListFriend(user.id,req.params.id);
-            if(FoundlistFriend) {
+            const FindListFriend = await userService.findListFriend(user.id, req.params.id);
+            if(FindListFriend) {
                 return next(new ApiError(400, "User already exists in friends list"));
             }
 
             const document = await userService.addFriend(user.id, req.params.id);
             if (!document) {
-                return next(new ApiError(404, "User not found"))
+                return next(new ApiError(404, "Failed to add friends"))
             }
             
-            return res.send({ message: "User was add successfully" });
+            return res.send({ message: "User was addfriend successfully" });
         });
     } catch (error) {
         return next(
@@ -68,7 +68,37 @@ exports.addFriend = async (req, res, next) => {
 };
 
 exports.unFriend = async (req, res, next) => {
+    try {
+        const authHeader = await req.header('Authorization');
+        const token = await authHeader.split(' ')[1];
+        if (!token) return next(new ApiError(400, "You're not authoticated"));
 
+        jwt.verify(token, config.JWT_Secret, async (error, user) => {
+            if (error) return next(new ApiError(400, "Token is not valid"));
+            
+            const userService = new UserService(MongoDB.client);
+            const FindUser = await userService.findById(req.params.id);
+            if(!FindUser) {
+                return next(new ApiError(400, "User does not exist"));
+            }
+
+            const FindListFriend = await userService.findListFriend(user.id, req.params.id);
+            if(!FindListFriend) {
+                return next(new ApiError(400, "User does not exist in friends list"));
+            }
+
+            const document = await userService.unFriend(user.id, req.params.id);
+            if (!document) {
+                return next(new ApiError(404, "Failed to unfriends"))
+            }
+            
+            return res.send({ message: "User was unfriends successfully" });
+        });
+    } catch (error) {
+        return next(
+            new ApiError(500, `Error update user with id=${req.params.id}`)
+        );
+    }
 };
 //Retrieve all users of a user from the database
 exports.findAll = async (req, res, next) => {
