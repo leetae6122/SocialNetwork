@@ -30,8 +30,11 @@ class UserService {
     }
 
     async findByName(name) {
+        const firstname = await name.split(' ')[0];
+        const lastname = await name.split(' ')[1];
         return await this.find({
-            fullname: { $regex: new RegExp(name), $options: "i" },
+            'fullname.firstname':{ $regex: new RegExp(firstname), $options: "i" } ,
+            'fullname.lastname':{ $regex: new RegExp(lastname), $options: "i" }
         });
     }
 

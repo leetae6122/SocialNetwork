@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const usersRouter = require("./app/routes/user.route");
 const authRouter = require("./app/routes/auth.route");
+const postsRouter = require("./app/routes/post.route");
 const auth = require("./app/middlewares/auth");
 const ApiError = require("./app/api-error");
 
@@ -18,8 +19,9 @@ app.get("/", (req, res) => {
     res.json({ message: "Welcome to contact book application." });
 });
 
-app.use("/api/users",auth.verifyToken ,usersRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/users",auth.verifyToken ,usersRouter);
+app.use("/api/posts",auth.verifyToken ,postsRouter);
 
 // handle 404 response 
 app.use((req, res, next) => {
