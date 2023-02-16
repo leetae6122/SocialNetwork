@@ -92,7 +92,7 @@ exports.findAll = async (req, res, next) => {
     try {
         const userService = new UserService(MongoDB.client);
         const { name } = req.query;
-        console.log(name)
+
         if (name) {
             documents = await userService.findByName(name);
         } else {

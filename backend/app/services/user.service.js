@@ -9,13 +9,14 @@ class UserService {
         const user = {
             username: payload.username,
             password: payload.password,
-            fullname: payload.fullname,
+            fullname:{
+                firstname: payload.firstname,
+                lastname: payload.lastname
+            },
             gender: payload.gender,
             email: payload.email,
             phone: payload.phone,
             admin: payload.admin,
-            favorite_post: payload.favorite_post,
-            list_friend: payload.list_friend
         };
         // Xóa các trường không xác định       
         Object.keys(user).forEach(
@@ -57,7 +58,7 @@ class UserService {
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
         }
-        const update = await authService.extractUserData(payload);
+        const update = this.extractUserData(payload);
         const result = await this.User.findOneAndUpdate(
             filter,
             { $set: update },
