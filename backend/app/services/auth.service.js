@@ -10,19 +10,21 @@ class AuthService{
         const user = {
             username: payload.username,
             password: payload.password,
-            fullname: payload.fullname,
+            fullname:{
+                firstname: payload.firstname,
+                lastname: payload.lastname
+            },
             gender: payload.gender,
             email: payload.email,
             phone: payload.phone,
             admin: payload.admin,
-            favorite_post: payload.favorite_post,
-            list_friend: payload.list_friend
         };
         Object.keys(user).forEach(
             (key) => user[key] === undefined && delete user[key]
         );
         return user;
     }
+    
     async signUp(payload) {
         const user = this.extractUserData(payload);
         const salt = bcrypt.genSaltSync(10);
@@ -33,8 +35,7 @@ class AuthService{
             {
                 $set: {
                     admin:false,
-                    password: passwordHashed,
-                    fullname: { firstname: payload.firstname, lastname: payload.lastname }
+                    password: passwordHashed
                 }
             },
             { returnDocument: "after", upsert: true }
