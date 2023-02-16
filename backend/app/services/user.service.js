@@ -45,13 +45,11 @@ class UserService {
         })
     }
 
-    async findListFriend(idUser, idAdd){
+    async findFriendsList(idUser, idAdd){
         return await this.User.findOne({
             _id:ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
-            list_friend: idAdd
+            friends_list: idAdd
         });
-        
-        
     }
 
     async update(id, payload) {
@@ -71,7 +69,7 @@ class UserService {
         const filter = {
             _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
         };
-        const update = {list_friend: idAdd};
+        const update = {friends_list: idAdd};
         const result = await this.User.findOneAndUpdate(
             filter,
             { $push: update },
@@ -84,7 +82,7 @@ class UserService {
         const filter = {
             _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
         };
-        const update = {list_friend: idAdd};
+        const update = {friends_list: idAdd};
         const result = await this.User.findOneAndUpdate(
             filter,
             { $pull: update },

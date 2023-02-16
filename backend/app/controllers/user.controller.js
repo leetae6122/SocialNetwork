@@ -41,7 +41,7 @@ exports.addFriend = async (req, res, next) => {
             return next(new ApiError(400, "User does not exist"));
         }
 
-        const FindListFriend = await userService.findListFriend(req.user.id, req.params.id);
+        const FindListFriend = await userService.findFriendsList(req.user.id, req.params.id);
         if (FindListFriend) {
             return next(new ApiError(400, "User already exists in friends list"));
         }
@@ -68,7 +68,7 @@ exports.unFriend = async (req, res, next) => {
             return next(new ApiError(400, "User does not exist"));
         }
 
-        const FindListFriend = await userService.findListFriend(req.user.id, req.params.id);
+        const FindListFriend = await userService.findFriendsList(req.user.id, req.params.id);
         if (!FindListFriend) {
             return next(new ApiError(400, "User does not exist in friends list"));
         }
