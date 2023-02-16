@@ -25,7 +25,6 @@ exports.findAll = async (req, res, next) => {
         }
         return res.send(documents.sort(await postService.dynamicSort("date_created")));
     } catch (error) {
-        console.log(error)
         return next(
             new ApiError(500, "An error occurred while retrieving the posts")
         );
