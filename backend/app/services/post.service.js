@@ -35,11 +35,6 @@ class PostService {
         return result.value;
     }
 
-    async find(filter) {
-        const cursor = await this.Post.find(filter);
-        return await cursor.toArray();
-    }
-
     async findById(id) {
         return await this.Post.findOne({
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null
