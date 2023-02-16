@@ -10,21 +10,28 @@ exports.findAll = async (req, res, next) => {
         const postService = new PostService(MongoDB.client);
         const userService = new UserService(MongoDB.client);
         const user = await userService.findById(req.user.id);
-        const listFriend = user.list_friend;
-        if (listFriend) {
-            for(let item of listFriend){
+        let friendsList = user.friends_list;
+        if(friendsList){
+            for(let item of friendsList){
                 documents = documents.concat(
                     await postService.findByUseID(item)
                 );
             }
-            documents = documents.concat(
-                await postService.findByUseID(req.user.id)
-            );
-        }else {
-            documents = await postService.find({});
         }
-        return res.send(documents.sort(await postService.dynamicSort("date_created")));
+
+        documents = documents.concat(
+            await postService.findByUseID(req.user.id)
+        );
+        
+        if (!documents) {
+            return next(
+                new ApiError(400, "Post does not exist")
+            );
+        }
+        documents = documents.sort(await postService.dynamicSort("date_created")) // sắp xếp tăng dần
+        return res.send(documents.reverse(documents)); // đảo thứ tự
     } catch (error) {
+        console.log(error)
         return next(
             new ApiError(500, "An error occurred while retrieving the posts")
         );
@@ -40,8 +47,25 @@ exports.findOne = async (req, res, next) => {
         }
         return res.send(document);
     } catch (error) {
+        console.log(error)
         return next(
             new ApiError(500, `Error retrieving user with id=${req.params.id}`)
+        );
+    }
+};
+
+exports.favoritePosts = async (req, res, next) => {
+    let documents = [];
+    try {
+        const postService = new PostService(MongoDB.client);
+        documents = await postService.findByUseID(req.user.id);
+        if (!documents) {
+            return next(new ApiError(404, "User not found"));
+        }
+        return res.send(documents.reverse(documents));
+    } catch (error) {
+        return next(
+            new ApiError(500, "An error occurred while retrieving the posts")
         );
     }
 };
@@ -77,6 +101,58 @@ exports.update = async (req, res, next) => {
     } catch (error) {
         return next(
             new ApiError(500, `Error update post with id=${req.params.id}`)
+        );
+    }
+};
+
+exports.favorite = async (req, res, next) => {
+    try {
+        const postService = new PostService(MongoDB.client);
+        const FindPost = await postService.findById(req.params.id);
+        if (!FindPost) {
+            return next(new ApiError(400, "Post does not exist"));
+        }
+
+        const findFavoritesList = await postService.findFavoritesList(req.user.id, req.params.id);
+        if (findFavoritesList) {
+            return next(new ApiError(400, "User already exists in favorites list"));
+        }
+
+        const document = await postService.favorite(req.user.id, req.params.id);
+        if (!document) {
+            return next(new ApiError(404, "Failed to favorite"))
+        }
+
+        return res.send({ message: "Post was favorite successfully" });
+    } catch (error) {
+        return next(
+            new ApiError(500, `Error favorite post with id=${req.params.id}`)
+        );
+    }
+};
+
+exports.unfavorite = async (req, res, next) => {
+    try {
+        const postService = new PostService(MongoDB.client);
+        const FindPost = await postService.findById(req.params.id);
+        if (!FindPost) {
+            return next(new ApiError(400, "Post does not exist"));
+        }
+
+        const findFavoritesList = await postService.findFavoritesList(req.user.id, req.params.id);
+        if (!findFavoritesList) {
+            return next(new ApiError(400, "User does not exist in favorites list"));
+        }
+
+        const document = await postService.unfavorite(req.user.id, req.params.id);
+        if (!document) {
+            return next(new ApiError(404, "Failed to unfavorite"))
+        }
+
+        return res.send({ message: "Post was unfavorite successfully" });
+    } catch (error) {
+        return next(
+            new ApiError(500, `Error unfavorite post with id=${req.params.id}`)
         );
     }
 };

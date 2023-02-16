@@ -35,15 +35,22 @@ class PostService {
         return result.value;
     }
 
+    async findByUseID(UserID) {
+        const cursor = await this.Post.find({ _uid: UserID });
+        return await cursor.toArray();
+    }
+
     async findById(id) {
         return await this.Post.findOne({
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null
         })
     }
 
-    async findByUseID(UserID) {
-        const cursor = await this.Post.find({ _uid: UserID });
-        return await cursor.toArray();
+    async findFavoritesList(UserID, id){
+        return await this.Post.findOne({
+            _id:ObjectId.isValid(id) ? new ObjectId(id) : null,
+            favorites_list: UserID
+        });
     }
 
     async delete(id) {
@@ -61,6 +68,32 @@ class PostService {
         const result = await this.Post.findOneAndUpdate(
             filter,
             { $set: update },
+            { returnDocument: "after" }
+        );
+        return result.value;
+    }
+    
+    async favorite (UserID, id) {
+        const filter = {
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
+        };
+        const update = {favorites_list: UserID};
+        const result = await this.Post.findOneAndUpdate(
+            filter,
+            { $push: update },
+            { returnDocument: "after" }
+        );
+        return result.value;
+    }
+
+    async unfavorite (UserID, id) {
+        const filter = {
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
+        };
+        const update = {favorites_list: UserID};
+        const result = await this.Post.findOneAndUpdate(
+            filter,
+            { $pull: update },
             { returnDocument: "after" }
         );
         return result.value;
