@@ -5,6 +5,7 @@ const cors = require("cors");
 const usersRouter = require("./app/routes/user.route");
 const authRouter = require("./app/routes/auth.route");
 const postsRouter = require("./app/routes/post.route");
+const commentsRouter = require("./app/routes/comment.route");
 const auth = require("./app/middlewares/auth");
 const ApiError = require("./app/api-error");
 
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/users",auth.verifyToken ,usersRouter);
 app.use("/api/posts",auth.verifyToken ,postsRouter);
+app.use("/api/comments",auth.verifyToken ,commentsRouter);
 
 // handle 404 response 
 app.use((req, res, next) => {
