@@ -10,7 +10,8 @@ class AuthService{
         const user = {
             username: payload.username,
             password: payload.password,
-            fullname:{
+            name:{
+                fullname: payload.fullname,
                 firstname: payload.firstname,
                 lastname: payload.lastname
             },
@@ -25,7 +26,7 @@ class AuthService{
         return user;
     }
     
-    async signUp(payload) {
+    async register(payload) {
         const user = this.extractUserData(payload);
         const salt = bcrypt.genSaltSync(10);
         const passwordHashed = bcrypt.hashSync(user.password, salt);
@@ -35,7 +36,8 @@ class AuthService{
             {
                 $set: {
                     admin:false,
-                    password: passwordHashed
+                    password: passwordHashed,
+                    fullname: payload.firstname+' '+payload.lastname
                 }
             },
             { returnDocument: "after", upsert: true }
@@ -43,7 +45,7 @@ class AuthService{
         return result.value;
     }
 
-    async signIn(payload, time) {
+    async login(payload, time) {
         return jwt.sign({
             iss: 'Le Duong Tri',
             id: payload._id,

@@ -9,7 +9,8 @@ class UserService {
         const user = {
             username: payload.username,
             password: payload.password,
-            fullname:{
+            name:{
+                fullname: payload.fullname,
                 firstname: payload.firstname,
                 lastname: payload.lastname
             },
@@ -31,11 +32,8 @@ class UserService {
     }
 
     async findByName(name) {
-        const firstname = await name.split(' ')[0];
-        const lastname = await name.split(' ')[1];
         return await this.find({
-            'fullname.firstname':{ $regex: new RegExp(firstname), $options: "i" } ,
-            'fullname.lastname':{ $regex: new RegExp(lastname), $options: "i" }
+            'name.fullname': { $regex: new RegExp(name), $options: "i" },
         });
     }
 
