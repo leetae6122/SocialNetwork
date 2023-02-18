@@ -99,9 +99,17 @@ class PostService {
         return result.value;
     }
 
-    async dynamicSort(property) {
+    //Sắp xếp tăng dần
+    async sortAscending(property) {
         return (a,b) => {
-            var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+            const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+            return result ;
+        }
+    }
+    //Sắp xếp giảm dần
+    async sortDescending(property) {
+        return (a,b) => {
+            const result = (a[property] > b[property]) ? -1 : (a[property] < b[property]) ? 1 : 0;
             return result ;
         }
     }

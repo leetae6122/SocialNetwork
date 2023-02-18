@@ -9,27 +9,27 @@ exports.findAll = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
         const userService = new UserService(MongoDB.client);
-        const user = await userService.findById(req.user.id);
-        let friendsList = user.friends_list;
-        if(friendsList){
-            for(let item of friendsList){
-                documents = documents.concat(
-                    await postService.findByUseID(item)
-                );
+        const { id } = req.query;
+        if (id) {
+            documents = documents.concat(
+                await postService.findByUseID(id)
+            );
+        } else {
+            const user = await userService.findById(req.user.id);
+            const friendsList = user.friends_list;
+            if (friendsList) {
+                for (let item of friendsList) {
+                    documents = documents.concat(
+                        await postService.findByUseID(item)
+                    );
+                }
             }
-        }
-
-        documents = documents.concat(
-            await postService.findByUseID(req.user.id)
-        );
-        
-        if (!documents) {
-            return next(
-                new ApiError(400, "Post does not exist")
+            documents = documents.concat(
+                await postService.findByUseID(req.user.id)
             );
         }
-        documents = documents.sort(await postService.dynamicSort("date_created")) // sắp xếp tăng dần
-        return res.send(documents.reverse(documents)); // đảo thứ tự
+        documents = documents.sort(await postService.sortDescending("date_created"));
+        return res.send(documents);
     } catch (error) {
         console.log(error)
         return next(
