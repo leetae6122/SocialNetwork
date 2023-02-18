@@ -3,6 +3,7 @@ const config = require("../config");
 const ApiError = require("../api-error");
 const MongoDB = require("../utils/mongodb.util");
 const PostService = require("../services/post.service");
+const CommentService = require("../services/comment.service");
 
 exports.verifyToken = async (req, res, next) => {
     try {
@@ -32,7 +33,7 @@ exports.verifyTokenAdmin = async (req, res, next) => {
         next();
     } else {
         return next(
-            new ApiError(400, "You're not allowed to delete other")
+            new ApiError(400, "You are not allowed to make other changes")
         );
     }
 }
@@ -40,11 +41,23 @@ exports.verifyTokenAdmin = async (req, res, next) => {
 exports.verifyTokenAdminPost = async (req, res, next) => {
     const postService = new PostService(MongoDB.client);
     const post = await postService.findById(req.params.id);
-    if ((req.user.id).toString() == post.id_user || req.user.admin) {
+    if ((req.user.id).toString() == post._uid || req.user.admin) {
         next();
     } else {
         return next(
-            new ApiError(400, "You're not allowed to delete other")
+            new ApiError(400, "You are not allowed to make other changes")
+        );
+    }
+}
+
+exports.verifyTokenAdminComment = async (req, res, next) => {
+    const commentService = new CommentService(MongoDB.client);
+    const comment = await commentService.findById(req.params.id);
+    if ((req.user.id).toString() == comment._uid || req.user.admin) {
+        next();
+    } else {
+        return next(
+            new ApiError(400, "You are not allowed to make other changes")
         );
     }
 }
