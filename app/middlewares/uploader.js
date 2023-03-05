@@ -14,9 +14,6 @@ const storage = new CloudinaryStorage({
   params:{
     folder:"social_network"
   }
-//   filename: function (req, file, cb) {
-//     cb(null, file.originalname); 
-//   }
 });
 
 const uploadCloud = multer({ storage });
