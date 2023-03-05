@@ -1,37 +1,16 @@
 const UserService = require("../services/user.service");
-const AuthService = require("../services/auth.service");
 const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
-const jwt = require("jsonwebtoken");
-const config = require("../config");
 
 exports.logOut = async (req, res, next) => {
-    res.clearCookie('refreshToken');
-    res.send({ message: "Log Out" })
+    try {
+        res.clearCookie("refreshToken");
+        res.send({ message: "Log Out" });
+        res.end();
+    } catch (error) {
+        console.log(error);
+    }
 };
-
-exports.refreshToken = async (req, res, next) => {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) return next(
-        new ApiError(400, "You're not authenticated")
-    );
-    const authService = new AuthService(MongoDB.client);
-    jwt.verify(refreshToken, config.JWT_Secret, async (error, user) => {
-        if (error) return next(
-            new ApiError(400, "Token is not valid")
-        );
-
-        const newAccessToken = await authService.signIn(user, "2h");
-        const newRefreshToken = await authService.signIn(user, "3d");
-        res.cookie("refreshToken", newRefreshToken, {
-            httpOnly: true,
-            secure: false,
-            path: "/",
-            sameSite: "strict",
-        });
-        return res.send({ AccessToken: newAccessToken });
-    })
-}
 
 exports.addFriend = async (req, res, next) => {
     try {
@@ -86,7 +65,7 @@ exports.unFriend = async (req, res, next) => {
         );
     }
 };
-//Retrieve all users of a user from the database
+
 exports.findAll = async (req, res, next) => {
     let documents = [];
     try {
@@ -97,6 +76,27 @@ exports.findAll = async (req, res, next) => {
             documents = await userService.findByName(name);
         } else {
             documents = await userService.find({});
+        }
+        return res.send(documents);
+    } catch (error) {
+        return next(
+            new ApiError(500, "An error occurred while retrieving the users")
+        );
+    }
+};
+
+exports.findFriendList = async (req, res, next) => {
+    let documents = [];
+    try {
+        const userService = new UserService(MongoDB.client);
+        const user = await userService.findById(req.user.id);
+        const friendsList = user.friends_list;
+        if (friendsList) {
+            for (let item of friendsList) {
+                documents = documents.concat(
+                    await userService.findById(item)
+                );
+            }
         }
         return res.send(documents);
     } catch (error) {

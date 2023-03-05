@@ -9,11 +9,7 @@ class UserService {
         const user = {
             username: payload.username,
             password: payload.password,
-            name:{
-                fullname: payload.fullname,
-                firstname: payload.firstname,
-                lastname: payload.lastname
-            },
+            fullname: payload.firstname+' '+payload.lastname,
             gender: payload.gender,
             email: payload.email,
             phone: payload.phone,
@@ -33,7 +29,7 @@ class UserService {
 
     async findByName(name) {
         return await this.find({
-            'name.fullname': { $regex: new RegExp(name), $options: "i" },
+            fullname: { $regex: new RegExp(name), $options: "i" },
         });
     }
 

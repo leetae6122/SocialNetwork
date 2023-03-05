@@ -1,12 +1,13 @@
 const express = require("express");
 const posts = require("../controllers/post.controller");
 const auth = require("../middlewares/auth");
+const uploadCloud = require("../middlewares/uploader.js");
 
 const router = express.Router();
 
 router.route("/")
     .get(posts.findAll)
-    .post(posts.create)
+    .post(uploadCloud.single('img'),posts.create) //fields many_img-many_key, single 1 img, array 1key-many_img
 router.route("/favorite")
     .get(posts.favoritePosts)
 router.route("/:id")

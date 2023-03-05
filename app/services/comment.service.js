@@ -8,6 +8,8 @@ class CommentService {
         const comment = {
             text: payload.text,
             img: payload.img,
+            date_created: new Date().getTime(),
+            changed: true
         };
         Object.keys(comment).forEach(
             (key) => comment[key] === undefined && delete comment[key]
@@ -44,8 +46,9 @@ class CommentService {
                 $set: {
                     _pid: PostID,
                     _uid: UserID,
-                    date_created: new Date()
-                }
+                    date_created: new Date().getTime() ,
+                    changed: false,   
+                },
             },
             { returnDocument: "after", upsert: true }
         );

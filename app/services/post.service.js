@@ -10,7 +10,9 @@ class PostService {
             content: {
                 text: payload.text,
                 img: payload.img
-            }
+            },
+            date_created: new Date().getTime(),
+            changed: true
         };
         Object.keys(post).forEach(
             (key) => post[key] === undefined && delete post[key]
@@ -27,8 +29,9 @@ class PostService {
                 $set: {
                     _uid: UserID,
                     content: { text: payload.text, img: payload.img },
-                    date_created: new Date()
-                }
+                    date_created: new Date().getTime() ,
+                    changed: false,
+                },
             },
             { returnDocument: "after", upsert: true }
         );
@@ -47,10 +50,12 @@ class PostService {
     }
 
     async findFavoritesList(UserID, id){
-        return await this.Post.findOne({
+        const res = await this.Post.findOne({
             _id:ObjectId.isValid(id) ? new ObjectId(id) : null,
             favorites_list: UserID
         });
+        console.log(res);
+        return res;
     }
 
     async delete(id) {
@@ -67,7 +72,7 @@ class PostService {
         const update = this.extractPostData(payload);
         const result = await this.Post.findOneAndUpdate(
             filter,
-            { $set: update },
+            { $set: update},
             { returnDocument: "after" }
         );
         return result.value;

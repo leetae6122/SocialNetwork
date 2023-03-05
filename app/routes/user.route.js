@@ -6,10 +6,10 @@ const router = express.Router();
 
 router.route("/")
     .get(users.findAll)
+router.route("/friends")
+    .get(users.findFriendList)
 router.route("/logout")
-    .post(users.logOut)
-router.route("/refresh")
-    .post(users.refreshToken)
+    .get(users.logOut)
 router.route("/:id")
     .get(users.findOne)
     .put(auth.verifyTokenAdmin, users.update)

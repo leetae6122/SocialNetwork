@@ -2,7 +2,7 @@ const PostService = require("../services/post.service");
 const UserService = require("../services/user.service");
 const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
-
+const cloudinary = require('cloudinary').v2;
 
 exports.findAll = async (req, res, next) => {
     let documents = [];
@@ -71,15 +71,17 @@ exports.favoritePosts = async (req, res, next) => {
 };
 
 exports.create = async (req, res, next) => {
-    if (!req.body?.title) {
-        return next(new ApiError(400, "Title can not be empty"));
-    }
     try {
+        const fileData = req.file
+        if (!req.body?.text && !fileData?.path) {
+            return next(new ApiError(400, "Content can not be empty"));
+        }
         const postService = new PostService(MongoDB.client);
-        const document = await postService.create(req.user.id, req.body);
+        const document = await postService.create(req.user.id, {...req.body,img:fileData?.path});
         return res.send(document);
     } catch (error) {
         console.log(error)
+        if(fileData) cloudinary.uploader.destroy(fileData.filename) //delete img in cloud
         return next(
             new ApiError(500, "An error occurred while creating the user")
         );
