@@ -7,12 +7,12 @@ const router = express.Router();
 
 router.route("/")
     .get(posts.findAll)
-    .post(uploadCloud.single('img'),posts.create) //fields many_img-many_key, single 1 img, array 1key-many_img
+    .post(uploadCloud.single('image'),posts.create) //fields many_img-many_key, single 1 img, array 1key-many_img
 router.route("/favorite")
     .get(posts.favoritePosts)
 router.route("/:id")
     .get(posts.findOne)
-    .put(auth.verifyTokenAdminPost, posts.update)
+    .put(auth.verifyTokenAdminPost, uploadCloud.single('image'), posts.update)
     .delete(auth.verifyTokenAdminPost, posts.delete)
 router.route("/:id/favorite")
     .put(posts.favorite)

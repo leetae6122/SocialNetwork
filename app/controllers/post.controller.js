@@ -73,15 +73,18 @@ exports.favoritePosts = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     try {
         const fileData = req.file;
+        console.log(req.body);
         if (!req.body?.text && !fileData?.path) {
             return next(new ApiError(400, "Content can not be empty"));
         }
         const postService = new PostService(MongoDB.client);
-        const document = await postService.create(req.user.id, {...req.body,img:fileData?.path});
+        const document = await postService.create(req.user.id, {
+            ...req.body, path: fileData?.path, filename: fileData?.filename
+        });
         return res.send(document);
     } catch (error) {
         console.log(error)
-        if(fileData) cloudinary.uploader.destroy(fileData.filename) //delete img in cloud
+        if (fileData) cloudinary.uploader.destroy(fileData.filename) //delete img in cloud
         return next(
             new ApiError(500, "An error occurred while creating the user")
         );
@@ -89,18 +92,40 @@ exports.create = async (req, res, next) => {
 };
 
 exports.update = async (req, res, next) => {
-    if (Object.keys(req.body).length === 0) {
-        return next(ApiError(400, "Data to update can not be empty"));
-    }
-
     try {
+        if (Object.keys(req.body).length === 0 && !(req.file)) {
+            return next(new ApiError(400, "Data to update can not be empty"));
+        }
+
         const postService = new PostService(MongoDB.client);
-        const document = await postService.update(req.params.id, req.body);
-        if (!document) {
-            return new (ApiError(404, "Post not found"))
+        
+        const findPost = await postService.findById(req.params.id);
+        if (!findPost) {
+            return next(new ApiError(404, "Post does not exist"));
+        }
+
+        const fileData = req.file;
+        if (fileData) {
+            cloudinary.uploader.destroy(findPost.image.img_name);
+            const document = await postService.update(req.params.id, {
+                ...req.body, path: fileData.path, filename: fileData.filename
+            });
+            console.log("update có file");
+            if (!document) {
+                return new (ApiError(404, "Post not found"))
+            }
+        } else {
+            console.log("update ko file",{...req.body});
+            const document = await postService.update(req.params.id, {
+                ...req.body,path: findPost.image.img_data
+                , filename: findPost.image.img_name});
+            if (!document) {
+                return new (ApiError(404, "Post not found"))
+            }
         }
         return res.send({ message: "Post was update successfully" });
     } catch (error) {
+        console.log(error);
         return next(
             new ApiError(500, `Error update post with id=${req.params.id}`)
         );
@@ -162,12 +187,18 @@ exports.unfavorite = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
+        const findPost = await postService.findById(req.params.id);
+        if (!findPost) {
+            return next(new ApiError(404, "Post does not exist"));
+        }
+        cloudinary.uploader.destroy(findPost.content.image.img_name);
         const document = await postService.delete(req.params.id);
         if (!document) {
             return next(new ApiError(404, "Post not found"));
         }
         return res.send({ message: "Post was deleted successfully" });
     } catch (error) {
+        console.log(error);
         return next(
             new ApiError(500, `Could not delete post with id=${req.params.id}`)
         );

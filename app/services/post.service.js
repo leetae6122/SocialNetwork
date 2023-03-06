@@ -7,9 +7,10 @@ class PostService {
     extractPostData(payload) {
         const post = {
             title: payload.title,
-            content: {
-                text: payload.text,
-                img: payload.img
+            text: payload.text,
+            image: {
+                img_data: payload.path,
+                img_name: payload.filename
             },
             date_created: new Date().getTime(),
             changed: true
@@ -28,12 +29,24 @@ class PostService {
             {
                 $set: {
                     _uid: UserID,
-                    content: { text: payload.text, img: payload.img },
-                    date_created: new Date().getTime() ,
+                    date_created: new Date().getTime(),
                     changed: false,
                 },
             },
             { returnDocument: "after", upsert: true }
+        );
+        return result.value;
+    }
+
+    async update(id, payload) {
+        const filter = {
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
+        }
+        const update = this.extractPostData(payload);
+        const result = await this.Post.findOneAndUpdate(
+            filter,
+            { $set: update },
+            { returnDocument: "after" }
         );
         return result.value;
     }
@@ -49,9 +62,9 @@ class PostService {
         })
     }
 
-    async findFavoritesList(UserID, id){
+    async findFavoritesList(UserID, id) {
         const res = await this.Post.findOne({
-            _id:ObjectId.isValid(id) ? new ObjectId(id) : null,
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
             favorites_list: UserID
         });
         console.log(res);
@@ -65,24 +78,11 @@ class PostService {
         return result.value;
     }
 
-    async update(id, payload) {
-        const filter = {
-            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-        }
-        const update = this.extractPostData(payload);
-        const result = await this.Post.findOneAndUpdate(
-            filter,
-            { $set: update},
-            { returnDocument: "after" }
-        );
-        return result.value;
-    }
-    
-    async favorite (UserID, id) {
+    async favorite(UserID, id) {
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
         };
-        const update = {favorites_list: UserID};
+        const update = { favorites_list: UserID };
         const result = await this.Post.findOneAndUpdate(
             filter,
             { $push: update },
@@ -91,11 +91,11 @@ class PostService {
         return result.value;
     }
 
-    async unfavorite (UserID, id) {
+    async unfavorite(UserID, id) {
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
         };
-        const update = {favorites_list: UserID};
+        const update = { favorites_list: UserID };
         const result = await this.Post.findOneAndUpdate(
             filter,
             { $pull: update },
@@ -106,16 +106,16 @@ class PostService {
 
     //Sắp xếp tăng dần
     async sortAscending(property) {
-        return (a,b) => {
+        return (a, b) => {
             const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-            return result ;
+            return result;
         }
     }
     //Sắp xếp giảm dần
     async sortDescending(property) {
-        return (a,b) => {
+        return (a, b) => {
             const result = (a[property] > b[property]) ? -1 : (a[property] < b[property]) ? 1 : 0;
-            return result ;
+            return result;
         }
     }
 }
