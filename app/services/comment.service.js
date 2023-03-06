@@ -6,8 +6,8 @@ class CommentService {
     }
     extractPostData(payload) {
         const comment = {
-            text: payload.text,
-            img: payload.img,
+            content: payload.content,
+            image: payload.image,
             date_created: new Date().getTime(),
             changed: true
         };

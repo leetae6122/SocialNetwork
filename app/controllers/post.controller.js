@@ -113,9 +113,7 @@ exports.update = async (req, res, next) => {
                 return new (ApiError(404, "Post not found"))
             }
         } else {
-            const document = await postService.update(req.params.id, {
-                ...req.body,path: findPost.image.img_data
-                , filename: findPost.image.img_name});
+            const document = await postService.update(req.params.id, req.body);
             if (!document) {
                 return new (ApiError(404, "Post not found"))
             }
@@ -188,7 +186,7 @@ exports.delete = async (req, res, next) => {
         if (!findPost) {
             return next(new ApiError(404, "Post does not exist"));
         }
-        cloudinary.uploader.destroy(findPost.content.image.img_name);
+        cloudinary.uploader.destroy(findPost.image.img_name);
         const document = await postService.delete(req.params.id);
         if (!document) {
             return next(new ApiError(404, "Post not found"));
