@@ -110,12 +110,10 @@ exports.update = async (req, res, next) => {
             const document = await postService.update(req.params.id, {
                 ...req.body, path: fileData.path, filename: fileData.filename
             });
-            console.log("update có file");
             if (!document) {
                 return new (ApiError(404, "Post not found"))
             }
         } else {
-            console.log("update ko file",{...req.body});
             const document = await postService.update(req.params.id, {
                 ...req.body,path: findPost.image.img_data
                 , filename: findPost.image.img_name});
