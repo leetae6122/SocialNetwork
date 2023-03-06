@@ -73,7 +73,6 @@ exports.favoritePosts = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     try {
         const fileData = req.file;
-        console.log(req.body);
         if (!req.body?.text && !fileData?.path) {
             return next(new ApiError(400, "Content can not be empty"));
         }
