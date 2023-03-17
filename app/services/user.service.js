@@ -103,11 +103,11 @@ class UserService {
         return result.value;
     }
 
-    async unFriend(idUser, idAdd) {
+    async unFriend(idUser, idDel) {
         const filter = {
             _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
         };
-        const update = { friends_list: idAdd };
+        const update = { friends_list: idDel };
         const result = await this.User.findOneAndUpdate(
             filter,
             { $pull: update },

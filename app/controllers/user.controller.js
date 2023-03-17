@@ -42,18 +42,22 @@ exports.unFriend = async (req, res, next) => {
     try {
 
         const userService = new UserService(MongoDB.client);
-        const FindUser = await userService.findById(req.params.id);
+        const FindUser = await userService.findById(req.body.userid);
         if (!FindUser) {
             return next(new ApiError(400, "User does not exist"));
         }
 
-        const FindListFriend = await userService.findFriendsList(req.user.id, req.params.id);
+        const FindListFriend = await userService.findFriendsList(req.user.id, req.body.userid);
         if (!FindListFriend) {
             return next(new ApiError(400, "User does not exist in friends list"));
         }
 
-        const document = await userService.unFriend(req.user.id, req.params.id);
-        if (!document) {
+        const document1 = await userService.unFriend(req.user.id, req.body.userid);
+        if (!document1) {
+            return next(new ApiError(404, "Failed to unfriends"))
+        }
+        const document2 = await userService.unFriend(req.body.userid, req.user.id);
+        if (!document2) {
             return next(new ApiError(404, "Failed to unfriends"))
         }
 
@@ -61,7 +65,7 @@ exports.unFriend = async (req, res, next) => {
 
     } catch (error) {
         return next(
-            new ApiError(500, `Error update user with id=${req.params.id}`)
+            new ApiError(500, `Error update user with id=${req.body.userid}`)
         );
     }
 };
