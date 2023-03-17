@@ -7,9 +7,14 @@ class CommentService {
     extractPostData(payload) {
         const comment = {
             content: payload.content,
-            image: payload.image,
+            image: {
+                img_data: payload.path,
+                img_name: payload.filename
+            },
             date_created: new Date().getTime(),
-            changed: true
+            changed: true,
+            _pid: payload._pid,
+            _uid: payload._uid
         };
         Object.keys(comment).forEach(
             (key) => comment[key] === undefined && delete comment[key]
@@ -75,13 +80,6 @@ class CommentService {
         return result.value;
     }
 
-    //Sắp xếp tăng dần
-    async sortAscending(property) {
-        return (a,b) => {
-            const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-            return result ;
-        }
-    }
     //Sắp xếp giảm dần
     async sortDescending(property) {
         return (a,b) => {

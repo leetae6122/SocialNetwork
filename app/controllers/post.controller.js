@@ -9,10 +9,10 @@ exports.findAll = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
         const userService = new UserService(MongoDB.client);
-        const { id } = req.query;
-        if (id) {
+        const { uid } = req.query;
+        if (uid) {
             documents = documents.concat(
-                await postService.findByUseID(id)
+                await postService.findByUseID(uid)
             );
         } else {
             const user = await userService.findById(req.user.id);
@@ -73,7 +73,7 @@ exports.favoritePosts = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     try {
         const fileData = req.file;
-        if (!req.body?.text && !fileData?.path) {
+        if (!req.body?.content && !fileData) {
             return next(new ApiError(400, "Content can not be empty"));
         }
         const postService = new PostService(MongoDB.client);
@@ -91,11 +91,10 @@ exports.create = async (req, res, next) => {
 };
 
 exports.update = async (req, res, next) => {
+    if (Object.keys(req.body).length === 0 && !(req.file)) {
+        return next(new ApiError(400, "Data to update can not be empty"));
+    }
     try {
-        if (Object.keys(req.body).length === 0 && !(req.file)) {
-            return next(new ApiError(400, "Data to update can not be empty"));
-        }
-
         const postService = new PostService(MongoDB.client);
         
         const findPost = await postService.findById(req.params.id);
@@ -186,7 +185,7 @@ exports.delete = async (req, res, next) => {
         if (!findPost) {
             return next(new ApiError(404, "Post does not exist"));
         }
-        cloudinary.uploader.destroy(findPost.image.img_name);
+        cloudinary.uploader.destroy(findPost.image?.img_name);
         const document = await postService.delete(req.params.id);
         if (!document) {
             return next(new ApiError(404, "Post not found"));

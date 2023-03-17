@@ -14,7 +14,7 @@ exports.findAll = async (req, res, next) => {
         return res.send(documents);
     } catch (error) {
         return next(
-            new ApiError(500, "An error occurred while retrieving the users")
+            new ApiError(500, "An error occurred while retrieving the comments")
         );
     }
 };
@@ -44,7 +44,7 @@ exports.myComments = async (req, res, next) => {
         return res.send(documents);
     } catch (error) {
         return next(
-            new ApiError(500, "An error occurred while retrieving the users")
+            new ApiError(500, "An error occurred while retrieving the comments")
         );
     }
 };
@@ -59,7 +59,7 @@ exports.create = async (req, res, next) => {
         return res.send(document);
     } catch (error) {
         return next(
-            new ApiError(500, "An error occurred while creating the user")
+            new ApiError(500, "An error occurred while creating the comment")
         );
     }
 };

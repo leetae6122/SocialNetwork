@@ -12,13 +12,14 @@ class PostService {
                 img_data: payload.path,
                 img_name: payload.filename
             },
-            date_created: new Date().getTime(),
-            changed: true
+            changed: true,
+            date_created: payload.date_created,
+            _uid: payload._uid
         };
         Object.keys(post).forEach(
             (key) => post[key] === undefined && delete post[key]
         );
-        console.log();
+
         Object.keys(post.image).forEach(
             (key) => post.image[key] === undefined && delete post.image[key]
         );
@@ -49,7 +50,6 @@ class PostService {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
         }
         const update = this.extractPostData(payload);
-        console.log(update);
         const result = await this.Post.findOneAndUpdate(
             filter,
             { $set: update },

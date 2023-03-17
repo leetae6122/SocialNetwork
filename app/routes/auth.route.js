@@ -1,13 +1,12 @@
 const express = require("express");
-const auth = require("../controllers/auth.controller");
-
+const user = require("../controllers/user.controller");
 const router = express.Router();
 
 router.route("/login")
-    .post(auth.login)
+    .post(user.login)
 router.route("/register")
-    .post(auth.register)
+    .post(user.register)
 router.route("/refresh")
-    .post(auth.refreshToken)
+    .post(user.refreshToken)
 
 module.exports = router;
