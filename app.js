@@ -6,6 +6,7 @@ const usersRouter = require("./app/routes/user.route");
 const authRouter = require("./app/routes/auth.route");
 const postsRouter = require("./app/routes/post.route");
 const commentsRouter = require("./app/routes/comment.route");
+const newsRouter = require("./app/routes/news.route");
 const auth = require("./app/middlewares/auth");
 const ApiError = require("./app/api-error");
 
@@ -24,6 +25,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/users",auth.verifyToken ,usersRouter);
 app.use("/api/posts",auth.verifyToken ,postsRouter);
 app.use("/api/comments",auth.verifyToken ,commentsRouter);
+app.use("/api/news",auth.verifyToken ,newsRouter);
 
 // handle 404 response 
 app.use((req, res, next) => {
