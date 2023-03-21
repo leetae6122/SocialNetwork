@@ -12,7 +12,9 @@ exports.logOut = async (req, res, next) => {
         res.send({ message: "Log Out" });
         res.end();
     } catch (error) {
-        console.log(error);
+        return next(
+            new ApiError(500, `Error logout user with id=${req.user.id}`)
+        );
     }
 };
 
@@ -204,7 +206,6 @@ exports.register = async (req, res, next) => {
             return res.send(document);
         }
     } catch (error) {
-        console.log(error)
         return next(
             new ApiError(500, "An error occurred while creating the user")
         );
@@ -222,7 +223,7 @@ exports.login = async (req, res, next) => {
         if (!validPassword) return next(new ApiError(400, "Wrong password"));
         if (user && validPassword) {
             const accessToken = await userService.login(user, "2h");
-            const refreshToken = await userService.login(user, "1d");
+            const refreshToken = await userService.login(user, "8h");
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: false,
@@ -252,7 +253,7 @@ exports.refreshToken = async (req, res, next) => {
             new ApiError(400, "Token is not valid")
         );
         const newAccessToken = await userService.refresh(user, "2h");
-        const newRefreshToken = await userService.refresh(user, "1d");
+        const newRefreshToken = await userService.refresh(user, "8h");
         res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: false,

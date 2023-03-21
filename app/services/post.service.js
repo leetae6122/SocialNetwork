@@ -69,7 +69,6 @@ class PostService {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
             favorites_list: UserID
         });
-        console.log(res);
         return res;
     }
 

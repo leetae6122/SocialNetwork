@@ -29,7 +29,6 @@ exports.findAll = async (req, res, next) => {
         }
         return res.send(documents);
     } catch (error) {
-        console.log(error)
         return next(
             new ApiError(500, "An error occurred while retrieving the posts")
         );
@@ -45,7 +44,6 @@ exports.findOne = async (req, res, next) => {
         }
         return res.send(document);
     } catch (error) {
-        console.log(error)
         return next(
             new ApiError(500, `Error retrieving user with id=${req.params.id}`)
         );
@@ -61,7 +59,6 @@ exports.favoritedPosts = async (req, res, next) => {
         }
         return res.send(document);
     } catch (error) {
-        console.log(error)
         return next(
             new ApiError(500, 'An error occurred while retrieving the posts')
         );
@@ -188,7 +185,6 @@ exports.delete = async (req, res, next) => {
         }
         return res.send({ message: "Post was deleted successfully" });
     } catch (error) {
-        console.log(error);
         return next(
             new ApiError(500, `Could not delete post with id=${req.params.id}`)
         );

@@ -7,10 +7,8 @@ exports.findUserAll = async (req, res, next) => {
     try {
         const newsService = new NewsService(MongoDB.client);
         documents = await newsService.findByUserId(req.user.id);
-        console.log(documents);
         return res.send(documents);
     } catch (error) {
-        console.log(error);
         return next(
             new ApiError(500, "An error occurred while retrieving the news")
         );
