@@ -8,27 +8,25 @@ exports.findAll = async (req, res, next) => {
     let documents = [];
     try {
         const postService = new PostService(MongoDB.client);
-        const userService = new UserService(MongoDB.client);
         const { uid } = req.query;
         if (uid) {
-            documents = documents.concat(
-                await postService.findByUseID(uid)
-            );
+            documents = await postService.findByUseID(uid)
         } else {
+            const userService = new UserService(MongoDB.client);
             const user = await userService.findById(req.user.id);
             const friendsList = user.friends_list;
             if (friendsList) {
-                for (let item of friendsList) {
+                for (let userid of friendsList) {
                     documents = documents.concat(
-                        await postService.findByUseID(item)
+                        await postService.findByUseID(userid)
                     );
                 }
             }
             documents = documents.concat(
                 await postService.findByUseID(req.user.id)
             );
+            documents = documents.sort(await postService.sortDescending("date_created"));
         }
-        documents = documents.sort(await postService.sortDescending("date_created"));
         return res.send(documents);
     } catch (error) {
         console.log(error)
@@ -54,18 +52,18 @@ exports.findOne = async (req, res, next) => {
     }
 };
 
-exports.favoritePosts = async (req, res, next) => {
-    let documents = [];
+exports.favoritedPosts = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
-        documents = await postService.findByUseID(req.user.id);
-        if (!documents) {
-            return next(new ApiError(404, "User not found"));
+        const document = await postService.findFavoritedPosts(req.user.id);
+        if (!document) {
+            return next(new ApiError(404, "Favorite not found"));
         }
-        return res.send(documents.reverse(documents));
+        return res.send(document);
     } catch (error) {
+        console.log(error)
         return next(
-            new ApiError(500, "An error occurred while retrieving the posts")
+            new ApiError(500, 'An error occurred while retrieving the posts')
         );
     }
 };
@@ -82,7 +80,6 @@ exports.create = async (req, res, next) => {
         });
         return res.send(document);
     } catch (error) {
-        console.log(error)
         if (fileData) cloudinary.uploader.destroy(fileData.filename) //delete img in cloud
         return next(
             new ApiError(500, "An error occurred while creating the user")
@@ -96,7 +93,7 @@ exports.update = async (req, res, next) => {
     }
     try {
         const postService = new PostService(MongoDB.client);
-        
+
         const findPost = await postService.findById(req.params.id);
         if (!findPost) {
             return next(new ApiError(404, "Post does not exist"));
@@ -119,7 +116,6 @@ exports.update = async (req, res, next) => {
         }
         return res.send({ message: "Post was update successfully" });
     } catch (error) {
-        console.log(error);
         return next(
             new ApiError(500, `Error update post with id=${req.params.id}`)
         );
@@ -129,17 +125,17 @@ exports.update = async (req, res, next) => {
 exports.favorite = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
-        const FindPost = await postService.findById(req.params.id);
+        const FindPost = await postService.findById(req.body.id);
         if (!FindPost) {
             return next(new ApiError(400, "Post does not exist"));
         }
 
-        const findFavoritesList = await postService.findFavoritesList(req.user.id, req.params.id);
-        if (findFavoritesList) {
+        const findIsFavorite = await postService.findIsFavorite(req.user.id, req.body.id);
+        if (findIsFavorite) {
             return next(new ApiError(400, "User already exists in favorites list"));
         }
 
-        const document = await postService.favorite(req.user.id, req.params.id);
+        const document = await postService.favorite(req.user.id, req.body.id);
         if (!document) {
             return next(new ApiError(404, "Failed to favorite"))
         }
@@ -147,7 +143,7 @@ exports.favorite = async (req, res, next) => {
         return res.send({ message: "Post was favorite successfully" });
     } catch (error) {
         return next(
-            new ApiError(500, `Error favorite post with id=${req.params.id}`)
+            new ApiError(500, `Error favorite post with id=${req.body.id}`)
         );
     }
 };
@@ -155,17 +151,17 @@ exports.favorite = async (req, res, next) => {
 exports.unfavorite = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
-        const FindPost = await postService.findById(req.params.id);
+        const FindPost = await postService.findById(req.body.id);
         if (!FindPost) {
             return next(new ApiError(400, "Post does not exist"));
         }
 
-        const findFavoritesList = await postService.findFavoritesList(req.user.id, req.params.id);
-        if (!findFavoritesList) {
+        const findIsFavorite = await postService.findIsFavorite(req.user.id, req.body.id);
+        if (!findIsFavorite) {
             return next(new ApiError(400, "User does not exist in favorites list"));
         }
 
-        const document = await postService.unfavorite(req.user.id, req.params.id);
+        const document = await postService.unfavorite(req.user.id, req.body.id);
         if (!document) {
             return next(new ApiError(404, "Failed to unfavorite"))
         }
@@ -173,7 +169,7 @@ exports.unfavorite = async (req, res, next) => {
         return res.send({ message: "Post was unfavorite successfully" });
     } catch (error) {
         return next(
-            new ApiError(500, `Error unfavorite post with id=${req.params.id}`)
+            new ApiError(500, `Error unfavorite post with id=${req.body.id}`)
         );
     }
 };

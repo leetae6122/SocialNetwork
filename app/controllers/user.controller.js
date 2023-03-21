@@ -6,6 +6,8 @@ const config = require("../config");
 
 exports.logOut = async (req, res, next) => {
     try {
+        const userService = new UserService(MongoDB.client);
+        await userService.logout(req.user.id);
         res.clearCookie("refreshToken");
         res.send({ message: "Log Out" });
         res.end();

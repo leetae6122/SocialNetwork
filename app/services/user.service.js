@@ -13,7 +13,7 @@ class UserService {
             username: payload.username,
             password: payload.password,
             name: {
-                fullname:payload.lastname + ' ' + payload.firstname,
+                fullname: payload.lastname + ' ' + payload.firstname,
                 lastname: payload.lastname,
                 firstname: payload.firstname
             },
@@ -23,11 +23,11 @@ class UserService {
             admin: payload.admin,
             date_birth: payload.date_birth,
             places_lived: payload.places_lived,
-            avatar:{
+            avatar: {
                 avatar_data: payload.path,
                 avatar_name: payload.filename
             },
-            intro: payload.intro
+            intro: payload.intro,
         };
 
         Object.keys(user).forEach(
@@ -36,12 +36,12 @@ class UserService {
         Object.keys(user.name).forEach(
             (key) => user.name[key] === undefined && delete user.name[key]
         );
-        if(Object.keys(user.name).length == 0) {delete user.name}
+        if (Object.keys(user.name).length == 0) { delete user.name }
 
         Object.keys(user.avatar).forEach(
             (key) => user.avatar[key] === undefined && delete user.avatar[key]
         );
-        if(Object.keys(user.avatar).length == 0) {delete user.avatar}
+        if (Object.keys(user.avatar).length == 0) { delete user.avatar }
 
         return user;
     }
@@ -62,7 +62,7 @@ class UserService {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null
         })
     }
-    
+
     async findByFriendsList(idUser, name) {
         return await this.find({
             _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
@@ -141,7 +141,8 @@ class UserService {
                 $set: {
                     admin: false,
                     password: passwordHashed,
-                    avatar:{
+                    online: false,
+                    avatar: {
                         avatar_data: avatarDefault[Math.floor(Math.random() * 6)],
                     }
                 }
@@ -150,9 +151,29 @@ class UserService {
         );
         return result.value;
     }
-
+    async logout(id) {
+        const filter = {
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
+        };
+        const update = { online: false };
+        await this.User.findOneAndUpdate(
+            filter,
+            { $set: update },
+            { returnDocument: "after" }
+        );
+    }
     // Auth
     async login(payload, time) {
+        const filter = {
+            _id: ObjectId.isValid(payload._id) ? new ObjectId(payload._id) : null,
+        };
+        const update = { online: true };
+        await this.User.findOneAndUpdate(
+            filter,
+            { $set: update },
+            { returnDocument: "after" }
+        );
+
         return jwt.sign({
             iss: 'Le Duong Tri',
             id: payload._id,

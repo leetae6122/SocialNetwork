@@ -31,10 +31,15 @@ class NewsService {
     }
 
     async findByUserId(UserID) {
-        const cursor = await this.News.find({
-            _receiveUid: UserID, 
-            confirm: { $exists: false }
-        });
+        const cursor = await this.News.aggregate([
+            { $match:{
+                $and:[
+                    { _receiveUid: UserID },
+                    {confirm: { $exists: false }}
+                ]
+            } },
+            { $sort: { date_created: 1 } }
+        ]);
         return await cursor.toArray();
     }
 
@@ -72,14 +77,6 @@ class NewsService {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null
         })
         return result.value;
-    }
-
-    //Sắp xếp tăng dần
-    async sortAscending(property) {
-        return (a, b) => {
-            const result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-            return result;
-        }
     }
 }
 

@@ -41,7 +41,7 @@ exports.verifyTokenAdmin = async (req, res, next) => {
 exports.verifyTokenAdminPost = async (req, res, next) => {
     const postService = new PostService(MongoDB.client);
     const post = await postService.findById(req.params.id);
-    if ((req.user.id).toString() == post._uid || req.user.admin) {
+    if (req.user.id == post._uid || req.user.admin) {
         next();
     } else {
         return next(
@@ -53,7 +53,7 @@ exports.verifyTokenAdminPost = async (req, res, next) => {
 exports.verifyTokenAdminComment = async (req, res, next) => {
     const commentService = new CommentService(MongoDB.client);
     const comment = await commentService.findById(req.params.id);
-    if ((req.user.id).toString() == comment._uid || req.user.admin) {
+    if (req.user.id == comment._uid || req.user.admin) {
         next();
     } else {
         return next(

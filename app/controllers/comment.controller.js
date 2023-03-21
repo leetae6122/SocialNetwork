@@ -10,7 +10,6 @@ exports.findAll = async (req, res, next) => {
         const commentService = new CommentService(MongoDB.client);
         documents = await commentService.findAll(req.params.id);
         
-        documents = documents.sort(await commentService.sortDescending("date_created"))
         return res.send(documents);
     } catch (error) {
         return next(
@@ -40,7 +39,6 @@ exports.myComments = async (req, res, next) => {
         const commentService = new CommentService(MongoDB.client);
         documents = await commentService.findMyComments(req.user.id);
         
-        documents = documents.sort(await commentService.sortDescending("date_created"))
         return res.send(documents);
     } catch (error) {
         return next(
@@ -50,7 +48,7 @@ exports.myComments = async (req, res, next) => {
 };
 
 exports.create = async (req, res, next) => {
-    if (!req.body?.text) {
+    if (!req.body?.content) {
         return next(new ApiError(400, "Content can not be empty"));
     }
     try {

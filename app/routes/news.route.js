@@ -5,7 +5,7 @@ const news = require("../controllers/news.controller");
 const router = express.Router();
 
 router.route("/")
-    .get(news.findAll)
+    .get(news.findUserAll)
 router.route("/send")
     .post(news.create)
 router.route("/:id")

@@ -29,16 +29,18 @@ class CommentService {
     }
 
     async findMyComments(UserID) {
-        const cursor = await this.Comment.find({
-            _uid: UserID
-        });
+        const cursor = await this.Comment.aggregate([
+            { $match: { _uid: UserID } },
+            { $sort: { date_created: 1 } }
+        ]);
         return await cursor.toArray();
     }
 
     async findAll(PostID) {
-        const cursor = await this.Comment.find({
-            _pid: PostID
-        });
+        const cursor = await this.Comment.aggregate([
+            { $match: { _pid: PostID } },
+            { $sort: { date_created: 1 } }
+        ]);
         return await cursor.toArray();
     }
 
@@ -78,14 +80,6 @@ class CommentService {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null
         })
         return result.value;
-    }
-
-    //Sắp xếp giảm dần
-    async sortDescending(property) {
-        return (a,b) => {
-            const result = (a[property] > b[property]) ? -1 : (a[property] < b[property]) ? 1 : 0;
-            return result ;
-        }
     }
 }
 

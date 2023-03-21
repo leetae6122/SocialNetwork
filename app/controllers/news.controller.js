@@ -2,12 +2,12 @@ const NewsService = require("../services/news.service");
 const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
 
-exports.findAll = async (req, res, next) => {
+exports.findUserAll = async (req, res, next) => {
     let documents = [];
     try {
         const newsService = new NewsService(MongoDB.client);
         documents = await newsService.findByUserId(req.user.id);
-        documents = documents.sort(await newsService.sortAscending("date_created"));
+        console.log(documents);
         return res.send(documents);
     } catch (error) {
         console.log(error);

@@ -13,7 +13,6 @@ class PostService {
                 img_name: payload.filename
             },
             changed: true,
-            date_created: payload.date_created,
             _uid: payload._uid
         };
         Object.keys(post).forEach(
@@ -23,8 +22,8 @@ class PostService {
         Object.keys(post.image).forEach(
             (key) => post.image[key] === undefined && delete post.image[key]
         );
-        if(Object.keys(post.image).length == 0) {delete post.image}
-        
+        if (Object.keys(post.image).length == 0) { delete post.image }
+
         return post;
     }
 
@@ -57,25 +56,35 @@ class PostService {
         );
         return result.value;
     }
-
-    async findByUseID(UserID) {
-        const cursor = await this.Post.find({ _uid: UserID });
-        return await cursor.toArray();
+    async findFavoritedPosts(UserID) {
+        let result = await this.Post.aggregate([
+            { $unwind:  "$favorites_list" },
+            { $match: { favorites_list: UserID } }
+        ]);
+        return result = await result.toArray();
     }
 
-    async findById(id) {
-        return await this.Post.findOne({
-            _id: ObjectId.isValid(id) ? new ObjectId(id) : null
-        })
-    }
-
-    async findFavoritesList(UserID, id) {
+    async findIsFavorite(UserID, id) {
         const res = await this.Post.findOne({
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
             favorites_list: UserID
         });
         console.log(res);
         return res;
+    }
+
+    async findByUseID(UserID) {
+        const result = await this.Post.aggregate([
+            { $match: { _uid: UserID } },
+            { $sort: { date_created: -1 } }
+        ]);
+        return await result.toArray();
+    }
+
+    async findById(id) {
+        return await this.Post.findOne({
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : null
+        })
     }
 
     async delete(id) {
