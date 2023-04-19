@@ -11,7 +11,7 @@ router.route("/send")
 router.route("/:id")
     .get(news.findOne)
     .post(news.update)
-    .delete(auth.verifyTokenAdmin, news.delete)
+    .delete(auth.verifyAdminNews, news.delete)
 
 
 module.exports = router;

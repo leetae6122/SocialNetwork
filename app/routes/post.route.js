@@ -9,13 +9,13 @@ router.route("/")
     .get(posts.findAll)
     .post(uploadCloud.single('image'), posts.create) //fields many_img-many_key, single 1 img, array 1key-many_img
 router.route("/favorite")
-    .get(posts.favoritedPosts)
+    .get(posts.favoritePosts)
     .put(posts.favorite)
 router.route("/unfavorite")
     .put(posts.unfavorite)
 router.route("/:id")
     .get(posts.findOne)
-    .put(auth.verifyTokenAdminPost, uploadCloud.single('image'), posts.update)
-    .delete(auth.verifyTokenAdminPost, posts.delete)
+    .put(auth.verifyAdminPost, uploadCloud.single('image'), posts.update)
+    .delete(auth.verifyAdminPost, posts.delete)
 
 module.exports = router;

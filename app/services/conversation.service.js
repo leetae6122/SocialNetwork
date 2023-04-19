@@ -1,25 +1,18 @@
 const { ObjectId } = require("mongodb");
 
-class CommentService {
+class ConversationService {
     constructor(client) {
-        this.Comment = client.db().collection("comments");
+        this.Conversation = client.db().collection("conversations");
     }
-    extractCommentData(payload) {
-        const comment = {
-            content: payload.content,
-            image: {
-                img_data: payload.path,
-                img_name: payload.filename
-            },
-            date_created: new Date().getTime(),
-            changed: true,
-            _pid: payload._pid,
-            _uid: payload._uid
+    extractConversationData(payload) {
+        const Conversation = {
+            members: payload.members,
+            createdAt: payload.createdAt
         };
-        Object.keys(comment).forEach(
-            (key) => comment[key] === undefined && delete comment[key]
+        Object.keys(Conversation).forEach(
+            (key) => Conversation[key] === undefined && delete Conversation[key]
         );
-        return comment;
+        return Conversation;
     }
 
     async findById(id) {
@@ -28,12 +21,19 @@ class CommentService {
         })
     }
 
-    async findMyComments(UserID) {
-        const cursor = await this.Comment.aggregate([
-            { $match: { _uid: UserID } },
-            { $sort: { date_created: 1 } }
-        ]);
+    async findAllByUserId(uid) {
+        const cursor = await this.Conversation.find({members: {$in:[uid]}});
         return await cursor.toArray();
+    }
+
+
+    async findOneByUserId(uid, uidConnect) {
+        return await this.Conversation.findOne({
+            $and: [
+                { members: uid },
+                { members: uidConnect }
+            ]
+        });
     }
 
     async findAll(PostID) {
@@ -44,24 +44,21 @@ class CommentService {
         return await cursor.toArray();
     }
 
-    async create(UserID, PostID, payload) {
-        const comment = this.extractCommentData(payload);
+    async create(payload) {
+        const conversation = this.extractConversationData(payload);
 
-        const result = await this.Comment.findOneAndUpdate(
-            comment,
+        const result = await this.Conversation.findOneAndUpdate(
+            conversation,
             {
                 $set: {
-                    _pid: PostID,
-                    _uid: UserID,
-                    date_created: new Date().getTime() ,
-                    changed: false,   
+                    createdAt: new Date(),
                 },
             },
             { returnDocument: "after", upsert: true }
         );
         return result.value;
     }
-    
+
     async update(id, payload) {
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
@@ -83,4 +80,4 @@ class CommentService {
     }
 }
 
-module.exports = CommentService;
+module.exports = ConversationService;

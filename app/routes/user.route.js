@@ -17,7 +17,7 @@ router.route("/unfriend")
     .put(users.unFriend)
 router.route("/:id")
     .get(users.findOne)
-    .put(auth.verifyTokenAdmin, uploadCloud.single('avatar'), users.update)
-    .delete(auth.verifyTokenAdmin, users.delete)
+    .put(auth.verifyAdminUser, uploadCloud.single('avatar'), users.update)
+    .delete(auth.verifyAdminUser, users.delete)
 
 module.exports = router;

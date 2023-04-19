@@ -1,12 +1,15 @@
-require ('dotenv').config()
+require('dotenv').config()
 
 const express = require("express");
 const cors = require("cors");
+
 const usersRouter = require("./app/routes/user.route");
 const authRouter = require("./app/routes/auth.route");
 const postsRouter = require("./app/routes/post.route");
 const commentsRouter = require("./app/routes/comment.route");
 const newsRouter = require("./app/routes/news.route");
+const conversationRouter = require("./app/routes/conversation.route");
+const messageRouter = require("./app/routes/message.route");
 const auth = require("./app/middlewares/auth");
 const ApiError = require("./app/api-error");
 
@@ -18,15 +21,16 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
-    res.json({ message: "Welcome to contact book application." });
+    res.json({ message: "Welcome to social network application." });
 });
 
 app.use("/api/auth", authRouter);
-app.use("/api/users",auth.verifyToken ,usersRouter);
-app.use("/api/posts",auth.verifyToken ,postsRouter);
-app.use("/api/comments",auth.verifyToken ,commentsRouter);
-app.use("/api/news",auth.verifyToken ,newsRouter);
-
+app.use("/api/users", auth.verifyToken, usersRouter);
+app.use("/api/posts", auth.verifyToken, postsRouter);
+app.use("/api/comments", auth.verifyToken, commentsRouter);
+app.use("/api/news", auth.verifyToken, newsRouter);
+app.use("/api/conversations", auth.verifyToken, conversationRouter);
+app.use("/api/messages", auth.verifyToken, messageRouter);
 // handle 404 response 
 app.use((req, res, next) => {
     return next(new ApiError(404, "Resource not found"));
@@ -34,8 +38,8 @@ app.use((req, res, next) => {
 
 //define error-handling middleware last, after other app.use() and routes calls 
 app.use((error, req, res, next) => {
-    return res.status(error.statusCode || 500).json({ 
-        message: error.message || "Internal Server Error", 
+    return res.status(error.statusCode || 500).json({
+        message: error.message || "Internal Server Error",
     });
 });
 

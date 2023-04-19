@@ -44,12 +44,7 @@ exports.addFriend = async (req, res, next) => {
 
 exports.unFriend = async (req, res, next) => {
     try {
-
         const userService = new UserService(MongoDB.client);
-        const FindUser = await userService.findById(req.body.userid);
-        if (!FindUser) {
-            return next(new ApiError(400, "User does not exist"));
-        }
 
         const FindListFriend = await userService.findFriendsList(req.user.id, req.body.userid);
         if (!FindListFriend) {
@@ -141,7 +136,7 @@ exports.findOne = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
     if (Object.keys(req.body).length === 0 && !(req.file)) {
-        return next(ApiError(400, "Data to update can not be empty"));
+        return next(new ApiError(400, "Data to update can not be empty"));
     }
 
     try {
@@ -150,7 +145,6 @@ exports.update = async (req, res, next) => {
         if (!findUser) {
             return next(new ApiError(404, "User does not exist"));
         }
-
         const fileData = req.file;
         if (fileData) {
             cloudinary.uploader.destroy(findUser.avatar.avatar_name);
@@ -177,6 +171,12 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const userService = new UserService(MongoDB.client);
+        const findUser = await userService.findById(req.params.id);
+        if (!findUser) {
+            return next(new ApiError(404, "User does not exist"));
+        }
+        
+        cloudinary.uploader.destroy(findUser.image?.img_name);
         const document = await userService.delete(req.params.id);
         if (!document) {
             return next(new ApiError(404, "User not found"));
@@ -189,7 +189,7 @@ exports.delete = async (req, res, next) => {
     }
 };
 
-// Auth
+// Auth Route
 exports.register = async (req, res, next) => {
     if (!req.body?.username) {
         return next(new ApiError(400, "Username can not be empty"));
@@ -198,13 +198,20 @@ exports.register = async (req, res, next) => {
     }
     try {
         const userService = new UserService(MongoDB.client);
-        const foundUser = await userService.findUser(req.body);
-        if (foundUser) {
-            return next(new ApiError(400, "Username already exists in the database "));
-        } else {
-            const document = await userService.register(req.body);
-            return res.send(document);
+        
+        if (await userService.findUserByUsername(req.body.username)) {
+            return next(new ApiError(400, "Username already exists"));
         }
+        if (await userService.findUserByEmail(req.body.email)) {
+            return next(new ApiError(400, "Email already exists"));
+        }
+        if (await userService.findUserByPhone(req.body.phone)) {
+            return next(new ApiError(400, "Phone already exists"));
+        }
+
+        const document = await userService.register(req.body);
+        return res.send(document);
+        
     } catch (error) {
         return next(
             new ApiError(500, "An error occurred while creating the user")
@@ -215,7 +222,7 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     try {
         const userService = new UserService(MongoDB.client);
-        const user = await userService.findUser(req.body);
+        const user = await userService.findUserByUsername(req.body.username);
 
         if (!user) return next(new ApiError(400, "Wrong username"));
 

@@ -50,10 +50,10 @@ exports.findOne = async (req, res, next) => {
     }
 };
 
-exports.favoritedPosts = async (req, res, next) => {
+exports.favoritePosts = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
-        const document = await postService.findFavoritedPosts(req.user.id);
+        const document = await postService.findFavoritePosts(req.user.id);
         if (!document) {
             return next(new ApiError(404, "Favorite not found"));
         }
@@ -77,7 +77,7 @@ exports.create = async (req, res, next) => {
         });
         return res.send(document);
     } catch (error) {
-        if (fileData) cloudinary.uploader.destroy(fileData.filename) //delete img in cloud
+        if (req.file) cloudinary.uploader.destroy( req.file?.filename) //delete img in cloud
         return next(
             new ApiError(500, "An error occurred while creating the user")
         );
@@ -122,10 +122,6 @@ exports.update = async (req, res, next) => {
 exports.favorite = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
-        const FindPost = await postService.findById(req.body.id);
-        if (!FindPost) {
-            return next(new ApiError(400, "Post does not exist"));
-        }
 
         const findIsFavorite = await postService.findIsFavorite(req.user.id, req.body.id);
         if (findIsFavorite) {
@@ -134,7 +130,7 @@ exports.favorite = async (req, res, next) => {
 
         const document = await postService.favorite(req.user.id, req.body.id);
         if (!document) {
-            return next(new ApiError(404, "Failed to favorite"))
+            return next(new ApiError(404, "Post does not exist"))
         }
 
         return res.send({ message: "Post was favorite successfully" });
@@ -148,10 +144,6 @@ exports.favorite = async (req, res, next) => {
 exports.unfavorite = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
-        const FindPost = await postService.findById(req.body.id);
-        if (!FindPost) {
-            return next(new ApiError(400, "Post does not exist"));
-        }
 
         const findIsFavorite = await postService.findIsFavorite(req.user.id, req.body.id);
         if (!findIsFavorite) {
@@ -160,7 +152,7 @@ exports.unfavorite = async (req, res, next) => {
 
         const document = await postService.unfavorite(req.user.id, req.body.id);
         if (!document) {
-            return next(new ApiError(404, "Failed to unfavorite"))
+            return next(new ApiError(404, "Post does not exist"))
         }
 
         return res.send({ message: "Post was unfavorite successfully" });

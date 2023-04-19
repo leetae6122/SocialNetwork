@@ -4,7 +4,7 @@ class NewsService {
     constructor(client) {
         this.News = client.db().collection("news");
     }
-    extractPostData(payload) {
+    extractNewsData(payload) {
         const news = {
             _receiveUid: payload._receiveUid,
             _sendUid: payload._sendUid,
@@ -44,7 +44,7 @@ class NewsService {
     }
 
     async create(payload) {
-        const news = this.extractPostData(payload);
+        const news = this.extractNewsData(payload);
         const result = await this.News.findOneAndUpdate(
             news,
             {
@@ -63,7 +63,7 @@ class NewsService {
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
         }
-        const update = this.extractPostData(payload);
+        const update = this.extractNewsData(payload);
         const result = await this.News.findOneAndUpdate(
             filter,
             { $set: update },

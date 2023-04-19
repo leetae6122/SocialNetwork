@@ -52,7 +52,7 @@ class UserService {
     }
 
     async findByName(name) {
-        return await this.find({
+        return await this.User.find({
             'name.fullname': { $regex: new RegExp(name), $options: "i" },
         });
     }
@@ -127,7 +127,7 @@ class UserService {
         const user = this.extractUserData(payload);
         const salt = bcrypt.genSaltSync(10);
         const passwordHashed = bcrypt.hashSync(user.password, salt);
-        const avatarDefault = [
+        const defaultAvatar = [
             'https://res.cloudinary.com/dydmgqi9c/image/upload/v1678001729/social_network/Rapid_d6v75k.png'
             , 'https://res.cloudinary.com/dydmgqi9c/image/upload/v1678001729/social_network/Panda_anjojs.png'
             , 'https://res.cloudinary.com/dydmgqi9c/image/upload/v1678001729/social_network/Ninja_xifnyk.png'
@@ -143,7 +143,7 @@ class UserService {
                     password: passwordHashed,
                     online: false,
                     avatar: {
-                        avatar_data: avatarDefault[Math.floor(Math.random() * 6)],
+                        avatar_data: defaultAvatar[Math.floor(Math.random() * 6)],
                     }
                 }
             },
@@ -162,7 +162,7 @@ class UserService {
             { returnDocument: "after" }
         );
     }
-    // Auth
+    // Auth Route
     async login(payload, time) {
         const filter = {
             _id: ObjectId.isValid(payload._id) ? new ObjectId(payload._id) : null,
@@ -199,15 +199,14 @@ class UserService {
         );
     }
 
-    async findUser(payload) {
-        return await this.User.findOne({
-            $or: [
-                { username: payload.username },
-                { email: payload.email },
-                { phone: payload.phone },
-            ]
-        })
+    async findUserByUsername(payload) {
+        return await this.User.findOne({ username: payload }); 
     }
-
+    async findUserByEmail(payload) {
+        return await this.User.findOne({ email: payload }); 
+    }
+    async findUserByPhone(payload) {
+        return await this.User.findOne({ phone: payload}); 
+    }
 }
 module.exports = UserService;

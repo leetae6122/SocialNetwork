@@ -1,4 +1,4 @@
-const CommentService = require("../services/comment.service");
+const ConversationService = require("../services/conversation.service");
 const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
 
@@ -18,8 +18,8 @@ exports.findAll = async (req, res, next) => {
 
 exports.findOne = async (req, res, next) => {
     try {
-        const commentService = new CommentService(MongoDB.client);
-        const document = await commentService.findById(req.params.id);
+        const conversationService = new ConversationService(MongoDB.client);
+        const document = await conversationService.findOneByUserId(req.user.id,req.params.userId);
         if (!document) {
             return next(new ApiError(404, "Comment not found"));
         }
@@ -31,27 +31,10 @@ exports.findOne = async (req, res, next) => {
     }
 };
 
-exports.myComments = async (req, res, next) => {
-    let documents = [];
-    try {
-        const commentService = new CommentService(MongoDB.client);
-        documents = await commentService.findMyComments(req.user.id);
-        
-        return res.send(documents);
-    } catch (error) {
-        return next(
-            new ApiError(500, "An error occurred while retrieving the comments")
-        );
-    }
-};
-
 exports.create = async (req, res, next) => {
-    if (!req.body?.content) {
-        return next(new ApiError(400, "Content can not be empty"));
-    }
     try {
-        const commentService = new CommentService(MongoDB.client);
-        const document = await commentService.create(req.user.id, req.params.id, req.body);
+        const conversationService = new ConversationService(MongoDB.client);
+        const document = await conversationService.create({members:[req.body.senderId,req.body.receiverId]});
         return res.send(document);
     } catch (error) {
         return next(

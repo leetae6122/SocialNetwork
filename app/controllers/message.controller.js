@@ -1,12 +1,12 @@
-const CommentService = require("../services/comment.service");
+const MessageService = require("../services/message.service");
 const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
 
 exports.findAll = async (req, res, next) => {
     let documents = [];
     try {
-        const commentService = new CommentService(MongoDB.client);
-        documents = await commentService.findAll(req.params.id);
+        const messageService = new MessageService(MongoDB.client);
+        documents = await messageService.find({});
         
         return res.send(documents);
     } catch (error) {
@@ -18,8 +18,8 @@ exports.findAll = async (req, res, next) => {
 
 exports.findOne = async (req, res, next) => {
     try {
-        const commentService = new CommentService(MongoDB.client);
-        const document = await commentService.findById(req.params.id);
+        const messageService = new MessageService(MongoDB.client);
+        const document = await messageService.findByConversationId(req.params.conversationId);
         if (!document) {
             return next(new ApiError(404, "Comment not found"));
         }
@@ -31,27 +31,10 @@ exports.findOne = async (req, res, next) => {
     }
 };
 
-exports.myComments = async (req, res, next) => {
-    let documents = [];
-    try {
-        const commentService = new CommentService(MongoDB.client);
-        documents = await commentService.findMyComments(req.user.id);
-        
-        return res.send(documents);
-    } catch (error) {
-        return next(
-            new ApiError(500, "An error occurred while retrieving the comments")
-        );
-    }
-};
-
 exports.create = async (req, res, next) => {
-    if (!req.body?.content) {
-        return next(new ApiError(400, "Content can not be empty"));
-    }
     try {
-        const commentService = new CommentService(MongoDB.client);
-        const document = await commentService.create(req.user.id, req.params.id, req.body);
+        const messageService = new MessageService(MongoDB.client);
+        const document = await messageService.create(req.body);
         return res.send(document);
     } catch (error) {
         return next(

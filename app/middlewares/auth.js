@@ -4,6 +4,7 @@ const ApiError = require("../api-error");
 const MongoDB = require("../utils/mongodb.util");
 const PostService = require("../services/post.service");
 const CommentService = require("../services/comment.service");
+const NewsService = require("../services/news.service");
 
 exports.verifyToken = async (req, res, next) => {
     try {
@@ -11,7 +12,6 @@ exports.verifyToken = async (req, res, next) => {
         if(!authHeader) return next(new ApiError(400, "You're not authoticated"));
         const baerer = await authHeader.split(' ')[0];
         const token = await authHeader.split(' ')[1];
-
         if( token && baerer == "Bearer"){
             jwt.verify(token, config.JWT_Secret, (error, user) => {
                 if (error) return next(new ApiError(400, "Token is not valid"));
@@ -28,7 +28,7 @@ exports.verifyToken = async (req, res, next) => {
     }
 }
 
-exports.verifyTokenAdmin = async (req, res, next) => {
+exports.verifyAdminUser = async (req, res, next) => {
     if (req.user.id == req.params.id || req.user.admin) {
         next();
     } else {
@@ -38,7 +38,7 @@ exports.verifyTokenAdmin = async (req, res, next) => {
     }
 }
 
-exports.verifyTokenAdminPost = async (req, res, next) => {
+exports.verifyAdminPost = async (req, res, next) => {
     const postService = new PostService(MongoDB.client);
     const post = await postService.findById(req.params.id);
     if (req.user.id == post._uid || req.user.admin) {
@@ -50,10 +50,22 @@ exports.verifyTokenAdminPost = async (req, res, next) => {
     }
 }
 
-exports.verifyTokenAdminComment = async (req, res, next) => {
+exports.verifyAdminComment = async (req, res, next) => {
     const commentService = new CommentService(MongoDB.client);
     const comment = await commentService.findById(req.params.id);
     if (req.user.id == comment._uid || req.user.admin) {
+        next();
+    } else {
+        return next(
+            new ApiError(400, "You are not allowed to make other changes")
+        );
+    }
+}
+
+exports.verifyAdminNews = async (req, res, next) => {
+    const newsService = new NewsService(MongoDB.client);
+    const news = await newsService.findById(req.params.id);
+    if (req.user.id == news._sendUid || req.user.id == news._receiveUid  || req.user.admin) {
         next();
     } else {
         return next(

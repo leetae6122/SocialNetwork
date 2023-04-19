@@ -56,7 +56,7 @@ class PostService {
         );
         return result.value;
     }
-    async findFavoritedPosts(UserID) {
+    async findFavoritePosts(UserID) {
         let result = await this.Post.aggregate([
             { $unwind:  "$favorites_list" },
             { $match: { favorites_list: UserID } }
