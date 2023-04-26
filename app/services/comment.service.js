@@ -30,7 +30,7 @@ class CommentService {
 
     async findMyComments(UserID) {
         const cursor = await this.Comment.aggregate([
-            { $match: { _uid: UserID } },
+            { $match: { _uid: UserID.toString() } },
             { $sort: { date_created: 1 } }
         ]);
         return await cursor.toArray();
@@ -38,7 +38,7 @@ class CommentService {
 
     async findAll(PostID) {
         const cursor = await this.Comment.aggregate([
-            { $match: { _pid: PostID } },
+            { $match: { _pid: PostID.toString() } },
             { $sort: { date_created: 1 } }
         ]);
         return await cursor.toArray();
@@ -51,8 +51,8 @@ class CommentService {
             comment,
             {
                 $set: {
-                    _pid: PostID,
-                    _uid: UserID,
+                    _pid: PostID.toString(),
+                    _uid: UserID.toString(),
                     date_created: new Date().getTime() ,
                     changed: false,   
                 },

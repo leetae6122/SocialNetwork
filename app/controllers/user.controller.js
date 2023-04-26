@@ -7,13 +7,13 @@ const config = require("../config");
 exports.logOut = async (req, res, next) => {
     try {
         const userService = new UserService(MongoDB.client);
-        await userService.logout(req.user.id);
+        await userService.logout(req.user._id);
         res.clearCookie("refreshToken");
         res.send({ message: "Log Out" });
         res.end();
     } catch (error) {
         return next(
-            new ApiError(500, `Error logout user with id=${req.user.id}`)
+            new ApiError(500, `Error logout user with id=${req.user._id}`)
         );
     }
 };
@@ -30,7 +30,7 @@ exports.addFriend = async (req, res, next) => {
         if (!document1) {
             return next(new ApiError(404, "Failed to add friends"))
         }
-        const document2 = await userService.addFriend( req.body._receiveUid, req.body._sendUid);
+        const document2 = await userService.addFriend(req.body._receiveUid, req.body._sendUid);
         if (!document2) {
             return next(new ApiError(404, "Failed to add friends"))
         }
@@ -46,16 +46,16 @@ exports.unFriend = async (req, res, next) => {
     try {
         const userService = new UserService(MongoDB.client);
 
-        const FindListFriend = await userService.findFriendsList(req.user.id, req.body.userid);
+        const FindListFriend = await userService.findFriendsList(req.user._id, req.body.userid);
         if (!FindListFriend) {
             return next(new ApiError(400, "User does not exist in friends list"));
         }
 
-        const document1 = await userService.unFriend(req.user.id, req.body.userid);
+        const document1 = await userService.unFriend(req.user._id, req.body.userid);
         if (!document1) {
             return next(new ApiError(404, "Failed to unfriends"))
         }
-        const document2 = await userService.unFriend(req.body.userid, req.user.id);
+        const document2 = await userService.unFriend(req.body.userid, req.user._id);
         if (!document2) {
             return next(new ApiError(404, "Failed to unfriends"))
         }
@@ -91,7 +91,7 @@ exports.findFriendList = async (req, res, next) => {
     let documents = [];
     try {
         const userService = new UserService(MongoDB.client);
-        const user = await userService.findById(req.user.id);
+        const user = await userService.findById(req.user._id);
         const friendsList = user.friends_list;
         const { name } = req.query;
 
@@ -99,7 +99,7 @@ exports.findFriendList = async (req, res, next) => {
             if (name) {
                 for (let idUser of friendsList) {
                     documents = documents.concat(
-                        await userService.findByFriendsList(idUser,name)
+                        await userService.findByFriendsList(idUser, name)
                     );
                 }
             } else {
@@ -117,6 +117,28 @@ exports.findFriendList = async (req, res, next) => {
         );
     }
 };
+
+exports.findFriendListOfUser = async (req, res, next) => {
+    let documents = [];
+    try {
+        const userService = new UserService(MongoDB.client);
+        const user = await userService.findById(req.params.id);
+        const friendsList = user.friends_list;
+        if (friendsList) {
+            for (let idUser of friendsList) {
+                documents = documents.concat(
+                    await userService.findById(idUser)
+                );
+            }
+        }
+        return res.send(documents);
+    } catch (error) {
+        return next(
+            new ApiError(500, "An error occurred while retrieving the users")
+        );
+    }
+};
+
 
 //
 exports.findOne = async (req, res, next) => {
@@ -175,7 +197,7 @@ exports.delete = async (req, res, next) => {
         if (!findUser) {
             return next(new ApiError(404, "User does not exist"));
         }
-        
+
         cloudinary.uploader.destroy(findUser.image?.img_name);
         const document = await userService.delete(req.params.id);
         if (!document) {
@@ -198,7 +220,7 @@ exports.register = async (req, res, next) => {
     }
     try {
         const userService = new UserService(MongoDB.client);
-        
+
         if (await userService.findUserByUsername(req.body.username)) {
             return next(new ApiError(400, "Username already exists"));
         }
@@ -211,7 +233,7 @@ exports.register = async (req, res, next) => {
 
         const document = await userService.register(req.body);
         return res.send(document);
-        
+
     } catch (error) {
         return next(
             new ApiError(500, "An error occurred while creating the user")
@@ -229,8 +251,8 @@ exports.login = async (req, res, next) => {
         const validPassword = await userService.validPassword(req.body.password, user.password)
         if (!validPassword) return next(new ApiError(400, "Wrong password"));
         if (user && validPassword) {
-            const accessToken = await userService.login(user, "2h");
-            const refreshToken = await userService.login(user, "8h");
+            const accessToken = await userService.login(user, "4h");
+            const refreshToken = await userService.login(user, "12h");
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: false,
@@ -259,8 +281,8 @@ exports.refreshToken = async (req, res, next) => {
         if (error) return next(
             new ApiError(400, "Token is not valid")
         );
-        const newAccessToken = await userService.refresh(user, "2h");
-        const newRefreshToken = await userService.refresh(user, "8h");
+        const newAccessToken = await userService.refresh(user, "4h");
+        const newRefreshToken = await userService.refresh(user, "12h");
         res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: false,

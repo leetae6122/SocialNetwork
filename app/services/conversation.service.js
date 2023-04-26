@@ -16,13 +16,13 @@ class ConversationService {
     }
 
     async findById(id) {
-        return await this.Comment.findOne({
+        return await this.Conversation.findOne({
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null
         })
     }
 
     async findAllByUserId(uid) {
-        const cursor = await this.Conversation.find({members: {$in:[uid]}});
+        const cursor = await this.Conversation.find({members: {$in:[uid.toString()]}});
         return await cursor.toArray();
     }
 
@@ -30,19 +30,12 @@ class ConversationService {
     async findOneByUserId(uid, uidConnect) {
         return await this.Conversation.findOne({
             $and: [
-                { members: uid },
-                { members: uidConnect }
+                { members: uid.toString() },
+                { members: uidConnect.toString() }
             ]
         });
     }
 
-    async findAll(PostID) {
-        const cursor = await this.Comment.aggregate([
-            { $match: { _pid: PostID } },
-            { $sort: { date_created: 1 } }
-        ]);
-        return await cursor.toArray();
-    }
 
     async create(payload) {
         const conversation = this.extractConversationData(payload);
@@ -59,21 +52,8 @@ class ConversationService {
         return result.value;
     }
 
-    async update(id, payload) {
-        const filter = {
-            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-        }
-        const update = this.extractCommentData(payload);
-        const result = await this.Comment.findOneAndUpdate(
-            filter,
-            { $set: update },
-            { returnDocument: "after" }
-        );
-        return result.value;
-    }
-
     async delete(id) {
-        const result = await this.Comment.findOneAndDelete({
+        const result = await this.Conversation.findOneAndDelete({
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null
         })
         return result.value;

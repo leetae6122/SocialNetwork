@@ -19,10 +19,10 @@ async function startServer() {
             }
         });
         io.on('connection', (socket) => {
-            // console.log('a user connected', socket.id);
+            console.log('a user connected', socket.id);
             socket.on("room", (data) => {
                 socket.join(data);
-                // console.log("room",data);
+                console.log("room",data);
             });
 
             socket.on("send", (data) => {

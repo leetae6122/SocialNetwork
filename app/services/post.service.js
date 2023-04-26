@@ -34,7 +34,7 @@ class PostService {
             post,
             {
                 $set: {
-                    _uid: UserID,
+                    _uid: UserID.toString(),
                     date_created: new Date().getTime(),
                     changed: false,
                 },
@@ -59,7 +59,7 @@ class PostService {
     async findFavoritePosts(UserID) {
         let result = await this.Post.aggregate([
             { $unwind:  "$favorites_list" },
-            { $match: { favorites_list: UserID } }
+            { $match: { favorites_list: UserID.toString() } }
         ]);
         return result = await result.toArray();
     }
@@ -67,14 +67,14 @@ class PostService {
     async findIsFavorite(UserID, id) {
         const res = await this.Post.findOne({
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-            favorites_list: UserID
+            favorites_list: UserID.toString()
         });
         return res;
     }
 
     async findByUseID(UserID) {
         const result = await this.Post.aggregate([
-            { $match: { _uid: UserID } },
+            { $match: { _uid: UserID.toString() } },
             { $sort: { date_created: -1 } }
         ]);
         return await result.toArray();
@@ -97,7 +97,7 @@ class PostService {
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
         };
-        const update = { favorites_list: UserID };
+        const update = { favorites_list: UserID.toString() };
         const result = await this.Post.findOneAndUpdate(
             filter,
             { $push: update },
@@ -110,7 +110,7 @@ class PostService {
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
         };
-        const update = { favorites_list: UserID };
+        const update = { favorites_list: UserID.toString() };
         const result = await this.Post.findOneAndUpdate(
             filter,
             { $pull: update },

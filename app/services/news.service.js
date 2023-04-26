@@ -13,6 +13,7 @@ class NewsService {
                 new_comment: payload.new_comment
             },
             readed: payload.readed,
+            confirm: payload.confirm,
         };
         Object.keys(news).forEach(
             (key) => news[key] === undefined && delete news[key]
@@ -34,8 +35,8 @@ class NewsService {
         const cursor = await this.News.aggregate([
             { $match:{
                 $and:[
-                    { _receiveUid: UserID },
-                    {confirm: { $exists: false }}
+                    { _receiveUid: UserID.toString() },
+                    {confirm: false }
                 ]
             } },
             { $sort: { date_created: 1 } }

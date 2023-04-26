@@ -52,9 +52,10 @@ class UserService {
     }
 
     async findByName(name) {
-        return await this.User.find({
+        const result = await this.User.find({
             'name.fullname': { $regex: new RegExp(name), $options: "i" },
         });
+        return await result.toArray();
     }
 
     async findById(id) {
@@ -64,20 +65,23 @@ class UserService {
     }
 
     async findByFriendsList(idUser, name) {
-        return await this.find({
+        const result = await this.find({
             _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
             'name.fullname': { $regex: new RegExp(name), $options: "i" }
         });
+        // console.log(await result.toArray());
+        return result;
     }
 
     async findFriendsList(idUser, idAdd) {
         return await this.User.findOne({
             _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
-            friends_list: idAdd
+            friends_list: idAdd.toString()
         });
     }
 
     async update(id, payload) {
+        console.log(payload);
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
         }
@@ -94,7 +98,7 @@ class UserService {
         const filter = {
             _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
         };
-        const update = { friends_list: idAdd };
+        const update = { friends_list: idAdd.toString() };
         const result = await this.User.findOneAndUpdate(
             filter,
             { $push: update },
@@ -107,7 +111,7 @@ class UserService {
         const filter = {
             _id: ObjectId.isValid(idUser) ? new ObjectId(idUser) : null,
         };
-        const update = { friends_list: idDel };
+        const update = { friends_list: idDel.toString() };
         const result = await this.User.findOneAndUpdate(
             filter,
             { $pull: update },

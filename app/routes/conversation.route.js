@@ -4,6 +4,8 @@ const router = express.Router();
 
 router.route("/")
     .post(conversations.create)
+router.route("/:id")
+    .delete(conversations.delete)
 router.route("/:userId")
     .get(conversations.findOne)
 

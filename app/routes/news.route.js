@@ -10,7 +10,7 @@ router.route("/send")
     .post(news.create)
 router.route("/:id")
     .get(news.findOne)
-    .post(news.update)
+    .put(news.update)
     .delete(auth.verifyAdminNews, news.delete)
 
 

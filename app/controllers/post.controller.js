@@ -13,7 +13,7 @@ exports.findAll = async (req, res, next) => {
             documents = await postService.findByUseID(uid)
         } else {
             const userService = new UserService(MongoDB.client);
-            const user = await userService.findById(req.user.id);
+            const user = await userService.findById(req.user._id);
             const friendsList = user.friends_list;
             if (friendsList) {
                 for (let userid of friendsList) {
@@ -23,7 +23,7 @@ exports.findAll = async (req, res, next) => {
                 }
             }
             documents = documents.concat(
-                await postService.findByUseID(req.user.id)
+                await postService.findByUseID(req.user._id)
             );
             documents = documents.sort(await postService.sortDescending("date_created"));
         }
@@ -53,7 +53,7 @@ exports.findOne = async (req, res, next) => {
 exports.favoritePosts = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
-        const document = await postService.findFavoritePosts(req.user.id);
+        const document = await postService.findFavoritePosts(req.user._id);
         if (!document) {
             return next(new ApiError(404, "Favorite not found"));
         }
@@ -72,7 +72,7 @@ exports.create = async (req, res, next) => {
             return next(new ApiError(400, "Content can not be empty"));
         }
         const postService = new PostService(MongoDB.client);
-        const document = await postService.create(req.user.id, {
+        const document = await postService.create(req.user._id, {
             ...req.body, path: fileData?.path, filename: fileData?.filename
         });
         return res.send(document);
@@ -123,12 +123,12 @@ exports.favorite = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
 
-        const findIsFavorite = await postService.findIsFavorite(req.user.id, req.body.id);
+        const findIsFavorite = await postService.findIsFavorite(req.user._id, req.body.id);
         if (findIsFavorite) {
             return next(new ApiError(400, "User already exists in favorites list"));
         }
 
-        const document = await postService.favorite(req.user.id, req.body.id);
+        const document = await postService.favorite(req.user._id, req.body.id);
         if (!document) {
             return next(new ApiError(404, "Post does not exist"))
         }
@@ -145,12 +145,12 @@ exports.unfavorite = async (req, res, next) => {
     try {
         const postService = new PostService(MongoDB.client);
 
-        const findIsFavorite = await postService.findIsFavorite(req.user.id, req.body.id);
+        const findIsFavorite = await postService.findIsFavorite(req.user._id, req.body.id);
         if (!findIsFavorite) {
             return next(new ApiError(400, "User does not exist in favorites list"));
         }
 
-        const document = await postService.unfavorite(req.user.id, req.body.id);
+        const document = await postService.unfavorite(req.user._id, req.body.id);
         if (!document) {
             return next(new ApiError(404, "Post does not exist"))
         }

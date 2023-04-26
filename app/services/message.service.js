@@ -17,20 +17,9 @@ class MessageService {
         return Message;
     }
 
-    async find(filter) {
-        const cursor = await this.Message.find(filter);
-        return await cursor.toArray();
-    }
-
     async findById(id) {
-        return await this.Message.findOne({
-            _id: ObjectId.isValid(id) ? new ObjectId(id) : null
-        })
-    }
-
-    async findByConversationId(id) {
         const cursor = await this.Message.find({
-            conversationId: id
+            conversationId: id.toString()
         })
         return await cursor.toArray();
     }
@@ -50,21 +39,8 @@ class MessageService {
         return result.value;
     }
 
-    async update(id, payload) {
-        const filter = {
-            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-        }
-        const update = this.extractCommentData(payload);
-        const result = await this.Comment.findOneAndUpdate(
-            filter,
-            { $set: update },
-            { returnDocument: "after" }
-        );
-        return result.value;
-    }
-
     async delete(id) {
-        const result = await this.Comment.findOneAndDelete({
+        const result = await this.Message.findOneAndDelete({
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null
         })
         return result.value;

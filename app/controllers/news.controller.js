@@ -6,7 +6,7 @@ exports.findUserAll = async (req, res, next) => {
     let documents = [];
     try {
         const newsService = new NewsService(MongoDB.client);
-        documents = await newsService.findByUserId(req.user.id);
+        documents = await newsService.findByUserId(req.user._id);
         return res.send(documents);
     } catch (error) {
         return next(
