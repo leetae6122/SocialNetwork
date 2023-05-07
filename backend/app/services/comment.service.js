@@ -7,10 +7,10 @@ class CommentService {
     extractCommentData(payload) {
         const comment = {
             content: payload.content,
-            image: {
-                img_data: payload.path,
-                img_name: payload.filename
-            },
+            // image: {
+            //     img_data: payload.path,
+            //     img_name: payload.filename
+            // },
             date_created: new Date().getTime(),
             changed: true,
             _pid: payload._pid,
