@@ -82,7 +82,7 @@
           <i class="fa-solid fa-floppy-disk mx-1"></i>
           Register
         </button>
-        <button type="reset" class="ml-2 btn btn-danger mx-1" data-bs-dismiss="modal">
+        <button type="button" class="ml-2 btn btn-danger mx-1" data-bs-dismiss="modal">
           <i class="fa-solid fa-trash-can mx-1"></i>
           Cancel
         </button>
